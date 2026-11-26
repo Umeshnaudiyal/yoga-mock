@@ -1,13 +1,14 @@
 'use client';
 
 import type { MouseEvent } from 'react';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useBookingModal } from './booking-modal';
 
 /** Pill-shaped primary call-to-action link with optional compact mobile sizing and booking popup trigger. */
 export function ActionLink({
   children,
-  href = '#contact',
+  href = '/contact',
   light = false,
   size = 'md',
   compactMobile = false,
@@ -38,6 +39,19 @@ export function ActionLink({
       ? 'h-5 w-5 sm:h-6 sm:w-6'
       : 'h-6 w-6 sm:h-8 sm:w-8';
 
+  const resolvedHref = modal && href === '#contact' ? '/contact' : href;
+  const isExternal =
+    resolvedHref.startsWith('http://') ||
+    resolvedHref.startsWith('https://') ||
+    resolvedHref.startsWith('mailto:') ||
+    resolvedHref.startsWith('tel:');
+
+  const sharedClassName = `group inline-flex items-center justify-center rounded-full uppercase transition duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${sizingClass} ${
+    light
+      ? 'bg-white text-forest shadow-[0_14px_34px_rgba(12,24,18,0.28)] ring-1 ring-white/80 hover:bg-sand hover:ring-sand hover:shadow-[0_18px_40px_rgba(12,24,18,0.34)]'
+      : 'bg-sage text-white shadow-[0_14px_28px_rgba(86,118,94,0.28)] hover:bg-forest hover:shadow-[0_18px_36px_rgba(35,59,48,0.32)]'
+  } ${className}`;
+
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (modal) {
       event.preventDefault();
@@ -46,16 +60,8 @@ export function ActionLink({
     onClick?.();
   };
 
-  return (
-    <a
-      href={modal && href === '#contact' ? '/contact' : href}
-      onClick={handleClick}
-      className={`group inline-flex items-center justify-center rounded-full uppercase transition duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${sizingClass} ${
-        light
-          ? 'bg-white text-forest shadow-[0_14px_34px_rgba(12,24,18,0.28)] ring-1 ring-white/80 hover:bg-sand hover:ring-sand hover:shadow-[0_18px_40px_rgba(12,24,18,0.34)]'
-          : 'bg-sage text-white shadow-[0_14px_28px_rgba(86,118,94,0.28)] hover:bg-forest hover:shadow-[0_18px_36px_rgba(35,59,48,0.32)]'
-      } ${className}`}
-    >
+  const innerContent = (
+    <>
       <span>{children}</span>
       <span
         className={`flex shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${circleClass} ${
@@ -70,6 +76,30 @@ export function ActionLink({
           className="transition-transform duration-300 group-hover:translate-x-0.5"
         />
       </span>
-    </a>
+    </>
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={resolvedHref}
+        onClick={handleClick}
+        data-booking-modal={modal ? 'true' : undefined}
+        className={sharedClassName}
+      >
+        {innerContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={resolvedHref}
+      onClick={handleClick}
+      data-booking-modal={modal ? 'true' : undefined}
+      className={sharedClassName}
+    >
+      {innerContent}
+    </Link>
   );
 }

@@ -137,7 +137,7 @@ export default function CoursesPage() {
 
       <section
         id="rishikesh-experience"
-        className="bg-sage-pale px-3 py-10 sm:px-8 sm:py-18 lg:px-0 lg:py-24"
+        className="scroll-mt-24 bg-sage-pale px-3 py-10 sm:scroll-mt-28 sm:px-8 sm:py-18 lg:px-0 lg:py-24"
       >
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
           <Reveal>

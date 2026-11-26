@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Activity,
   ArrowRight,
@@ -100,10 +101,77 @@ function fieldBorder(hasError?: boolean) {
 
 /** Provides the global Book Your Free Session modal across every route. */
 export function BookingModalProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [fields, setFields] = useState<ModalFields>(INITIAL_MODAL_FIELDS);
   const [errors, setErrors] = useState<Partial<Record<RequiredModalKey, string>>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleSamePageAnchorClick = (event: globalThis.MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest('a[href]');
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      if (anchor.hasAttribute('data-booking-modal')) return;
+      if (anchor.target && anchor.target !== '_self') return;
+
+      const rawHref = anchor.getAttribute('href');
+      if (!rawHref || !rawHref.includes('#') || rawHref === '#') return;
+
+      let resolvedUrl: URL;
+      try {
+        resolvedUrl = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+
+      if (
+        resolvedUrl.origin !== window.location.origin ||
+        resolvedUrl.pathname !== window.location.pathname ||
+        !resolvedUrl.hash ||
+        resolvedUrl.hash === '#'
+      ) {
+        return;
+      }
+
+      const targetId = decodeURIComponent(resolvedUrl.hash.slice(1));
+      const destination = document.getElementById(targetId);
+      if (!destination) return;
+
+      event.preventDefault();
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      destination.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      });
+
+      if (window.location.hash !== resolvedUrl.hash) {
+        window.history.replaceState(null, '', resolvedUrl.hash);
+      }
+    };
+
+    document.addEventListener('click', handleSamePageAnchorClick, true);
+    return () => document.removeEventListener('click', handleSamePageAnchorClick, true);
+  }, []);
 
   const openBooking = useCallback((defaultInterest?: string) => {
     setStatus('idle');

@@ -161,13 +161,13 @@ export default function RetreatsPage() {
                 title="Three tranquil sanctuaries across India."
                 description="Each Samsaara edition hosts up to 12 guests so every practice, meal, and silence feels personal."
               />
-              <a
-                href="/contact#location-map"
+              <Link
+                href="/contact"
                 className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.13em] text-forest transition hover:text-coral"
               >
                 <span>Tapovan flagship map</span>
                 <ArrowUpRight size={14} />
-              </a>
+              </Link>
             </div>
           </Reveal>
 
@@ -368,8 +368,8 @@ export default function RetreatsPage() {
               <ActionLink href="/contact" light>
                 Request retreat dates
               </ActionLink>
-              <a
-                href="/contact#location-map"
+              <Link
+                href="/contact"
                 className="group inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.15em] text-sand transition hover:text-white"
               >
                 <PlaneLanding size={14} />
@@ -378,7 +378,7 @@ export default function RetreatsPage() {
                   size={14}
                   className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                 />
-              </a>
+              </Link>
             </div>
           </div>
         </Reveal>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { Reveal } from './reveal';
 
@@ -29,7 +30,7 @@ export function ExperienceSection() {
   };
 
   return (
-    <section id="experience" className="bg-cream px-3 pb-10 pt-2 sm:px-8 sm:pb-16 lg:px-0 lg:pb-20">
+    <section id="experience" className="scroll-mt-24 bg-cream px-3 pb-10 pt-2 sm:scroll-mt-28 sm:px-8 sm:pb-16 lg:px-0 lg:pb-20">
       <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-sage/20 bg-white/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-sage shadow-xs">
@@ -87,13 +88,13 @@ export function ExperienceSection() {
                   {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
                   <span>{isMuted ? 'Unmute sound' : 'Mute sound'}</span>
                 </button>
-                <a
-                  href="#contact"
+                <Link
+                  href="/classes"
                   className="hidden items-center gap-1.5 rounded-full bg-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-sage sm:inline-flex"
                 >
                   <span>Join live</span>
                   <ArrowRight size={13} />
-                </a>
+                </Link>
               </div>
             </div>
           </div>

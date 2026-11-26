@@ -8,7 +8,7 @@ const asset = 'https://www.riteshyogaa.com';
 
 const exploreLinks = [
   ['About Ritesh Yoga', '/about'],
-  ['Programs', '/#programs'],
+  ['Programs', '/courses'],
   ['Live Classes', '/classes'],
   ['Teacher Training', '/courses'],
   ['Yoga Guides', '/resources'],
@@ -16,8 +16,8 @@ const exploreLinks = [
 ] as const;
 
 const programLinks = [
-  ['Beginner Yoga Journey', '/#programs'],
-  ['Morning Energy & Flexibility', '/#programs'],
+  ['Beginner Yoga Journey', '/classes'],
+  ['Morning Energy & Flexibility', '/classes'],
   ['200 Hour Training', '/courses/200-hour-teacher-training'],
   ['Samsaara Retreats', '/retreats'],
 ] as const;
