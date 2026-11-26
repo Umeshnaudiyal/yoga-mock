@@ -127,10 +127,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
       <section className="bg-sage-pale px-3 py-10 sm:px-8 sm:py-18 lg:px-0 lg:py-24">
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <SectionHeading
-            eyebrow="What you will explore"
-            title="Practice, study, integrate."
-          />
+          <Reveal>
+            <SectionHeading
+              eyebrow="What you will explore"
+              title="Practice, study, integrate."
+            />
+          </Reveal>
           <div className="mt-8 grid gap-4 sm:mt-12 md:grid-cols-3 md:gap-5">
             {[
               [
@@ -163,27 +165,29 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
       </section>
 
       <section className="px-3 py-12 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-sage">
-            Ready when you are
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-5xl">
-            Your next chapter can begin with one conversation.
-          </h2>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-ink/62 sm:mt-5 sm:text-[15px] sm:leading-7">
-            Tell us your travel dates and goals and we will send full syllabus and cohort openings.
-          </p>
-          <div className="mt-6 sm:mt-8">
-            <ActionLink href="/contact">Start the conversation</ActionLink>
+        <Reveal>
+          <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-sage">
+              Ready when you are
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-5xl">
+              Your next chapter can begin with one conversation.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-ink/62 sm:mt-5 sm:text-[15px] sm:leading-7">
+              Tell us your travel dates and goals and we will send full syllabus and cohort openings.
+            </p>
+            <div className="mt-6 sm:mt-8">
+              <ActionLink href="/contact">Start the conversation</ActionLink>
+            </div>
+            <Link
+              href="/courses"
+              className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-sage transition hover:text-forest"
+            >
+              <span>Back to all courses</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
-          <Link
-            href="/courses"
-            className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-sage transition hover:text-forest"
-          >
-            <span>Back to all courses</span>
-            <ArrowRight size={14} />
-          </Link>
-        </div>
+        </Reveal>
       </section>
 
       <SiteFooter />

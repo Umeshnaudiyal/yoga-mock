@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Globe2, HeartHandshake, Sparkles, Users } from 'lucide-react';
+import { Reveal } from './reveal';
 
 const stats = [
   { icon: Users, target: 10000, suffix: '+', label: 'Happy Students' },
@@ -77,29 +78,31 @@ export function StatsBar() {
 
   return (
     <section className="relative z-10 bg-cream px-3 pb-10 pt-2 sm:px-8 sm:pb-16 sm:pt-4 lg:px-0 lg:pb-20">
-      <div
-        ref={containerRef}
-        className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-y-5 rounded-xl border border-sage/15 bg-white/90 px-3 py-5 shadow-[0_18px_50px_rgba(80,98,83,0.08)] backdrop-blur-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-sage/20 sm:rounded-2xl sm:px-6 sm:py-7 lg:w-[92%] lg:py-8 2xl:w-[88%]"
-      >
-        {stats.map(({ icon: Icon, target, suffix, label }) => (
-          <div
-            key={label}
-            className="group flex flex-col items-center gap-3 px-3 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left"
-          >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-all duration-300 group-hover:scale-105 group-hover:bg-forest group-hover:text-sand sm:h-14 sm:w-14">
-              <Icon size={22} strokeWidth={1.85} />
-            </span>
-            <div>
-              <p className="font-display text-3xl font-extrabold tracking-[-0.04em] text-forest sm:text-4xl xl:text-[42px]">
-                <CountUpValue target={target} suffix={suffix} active={active} />
-              </p>
-              <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60 sm:text-xs">
-                {label}
-              </p>
+      <Reveal>
+        <div
+          ref={containerRef}
+          className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-y-5 rounded-xl border border-sage/15 bg-white/90 px-3 py-5 shadow-[0_18px_50px_rgba(80,98,83,0.08)] backdrop-blur-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-sage/20 sm:rounded-2xl sm:px-6 sm:py-7 lg:w-[92%] lg:py-8 2xl:w-[88%]"
+        >
+          {stats.map(({ icon: Icon, target, suffix, label }) => (
+            <div
+              key={label}
+              className="group flex flex-col items-center gap-3 px-3 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-all duration-300 group-hover:scale-105 group-hover:bg-forest group-hover:text-sand sm:h-14 sm:w-14">
+                <Icon size={22} strokeWidth={1.85} />
+              </span>
+              <div>
+                <p className="font-display text-3xl font-extrabold tracking-[-0.04em] text-forest sm:text-4xl xl:text-[42px]">
+                  <CountUpValue target={target} suffix={suffix} active={active} />
+                </p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-ink/60 sm:text-xs">
+                  {label}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </Reveal>
     </section>
   );
 }

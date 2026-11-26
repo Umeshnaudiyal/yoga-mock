@@ -89,40 +89,41 @@ export default function CoursesPage() {
 
       <section className="border-b border-sage/12 bg-white px-3 py-6 sm:px-8 sm:py-8 lg:px-0">
         <div className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-3 lg:w-[92%] lg:grid-cols-4 lg:gap-5 2xl:w-[88%]">
-          {internationalHighlights.map(([title, sub, Icon]) => (
-            <div
-              key={title}
-              className="flex items-start gap-2.5 rounded-xl border border-sage/15 bg-cream/60 p-3 sm:items-center sm:gap-3.5 sm:p-4"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
-                <Icon size={17} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-extrabold text-ink sm:text-sm">{title}</p>
-                <p className="mt-0.5 text-[11px] leading-snug text-ink/60 sm:text-xs">{sub}</p>
+          {internationalHighlights.map(([title, sub, Icon], index) => (
+            <Reveal key={title} delay={index * 60}>
+              <div className="flex h-full items-start gap-2.5 rounded-xl border border-sage/15 bg-cream/60 p-3 sm:items-center sm:gap-3.5 sm:p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
+                  <Icon size={17} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-ink sm:text-sm">{title}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ink/60 sm:text-xs">{sub}</p>
+                </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section className="px-3 py-10 sm:px-8 sm:py-18 lg:px-0 lg:py-24">
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <div className="mb-8 flex flex-col justify-between gap-4 sm:mb-12 sm:flex-row sm:items-end">
-            <SectionHeading
-              align="left"
-              eyebrow="The course library"
-              title="Find the depth that feels right."
-              description="Clear USD tuition including stay and meals. From foundational 100-hour study to full 500-hour certification."
-            />
-            <a
-              href="#rishikesh-experience"
-              className="hidden shrink-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-sage transition hover:text-forest sm:inline-flex"
-            >
-              <span>See what&apos;s included</span>
-              <ArrowRight size={14} />
-            </a>
-          </div>
+          <Reveal>
+            <div className="mb-8 flex flex-col justify-between gap-4 sm:mb-12 sm:flex-row sm:items-end">
+              <SectionHeading
+                align="left"
+                eyebrow="The course library"
+                title="Find the depth that feels right."
+                description="Clear USD tuition including stay and meals. From foundational 100-hour study to full 500-hour certification."
+              />
+              <a
+                href="#rishikesh-experience"
+                className="hidden shrink-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-sage transition hover:text-forest sm:inline-flex"
+              >
+                <span>See what&apos;s included</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+          </Reveal>
 
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {courseItems.map((course, index) => (
@@ -139,11 +140,13 @@ export default function CoursesPage() {
         className="bg-sage-pale px-3 py-10 sm:px-8 sm:py-18 lg:px-0 lg:py-24"
       >
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <SectionHeading
-            eyebrow="Seamless travel to India"
-            title="Everything arranged for your stay in Rishikesh"
-            description="Arrive in India without stress. From airport pickup in Dehradun to warm herbal tea after sunset meditation, we handle the essentials."
-          />
+          <Reveal>
+            <SectionHeading
+              eyebrow="Seamless travel to India"
+              title="Everything arranged for your stay in Rishikesh"
+              description="Arrive in India without stress. From airport pickup in Dehradun to warm herbal tea after sunset meditation, we handle the essentials."
+            />
+          </Reveal>
 
           <div className="mt-8 grid gap-5 sm:mt-12 lg:grid-cols-2 lg:gap-8">
             <Reveal>
@@ -214,17 +217,19 @@ export default function CoursesPage() {
 
       <section id="why" className="bg-forest px-3 py-12 text-white sm:px-8 sm:py-20 lg:px-0 lg:py-24">
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
-              Why train in Rishikesh
-            </p>
-            <h2 className="font-display text-3xl font-bold leading-[1.12] tracking-[-0.035em] sm:text-4xl lg:text-[46px]">
-              A training is more than a certificate.
-            </h2>
-            <p className="mt-3 text-[15px] leading-6 text-white/70 sm:mt-4 sm:text-base sm:leading-7">
-              It is a grounded season of practice, honest questions, and returning home with clarity.
-            </p>
-          </div>
+          <Reveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
+                Why train in Rishikesh
+              </p>
+              <h2 className="font-display text-3xl font-bold leading-[1.12] tracking-[-0.035em] sm:text-4xl lg:text-[46px]">
+                A training is more than a certificate.
+              </h2>
+              <p className="mt-3 text-[15px] leading-6 text-white/70 sm:mt-4 sm:text-base sm:leading-7">
+                It is a grounded season of practice, honest questions, and returning home with clarity.
+              </p>
+            </div>
+          </Reveal>
 
           <div className="mt-8 grid gap-4 sm:mt-12 md:grid-cols-3 md:gap-5">
             {reasons.map(([title, text, Icon], index) => (

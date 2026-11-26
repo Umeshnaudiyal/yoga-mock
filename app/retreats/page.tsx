@@ -135,40 +135,41 @@ export default function RetreatsPage() {
 
       <section className="border-b border-sage/12 bg-white px-2.5 py-5 sm:px-8 sm:py-8 lg:px-0">
         <div className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-2.5 sm:gap-4 lg:w-[92%] lg:grid-cols-4 lg:gap-5 2xl:w-[88%]">
-          {retreatHighlights.map(([title, sub, Icon]) => (
-            <div
-              key={title}
-              className="flex items-start gap-2.5 rounded-lg border border-sage/15 bg-cream/65 p-3 sm:items-center sm:gap-3.5 sm:rounded-xl sm:p-4"
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
-                <Icon size={16} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-extrabold text-ink sm:text-sm">{title}</p>
-                <p className="mt-0.5 text-[11px] leading-snug text-ink/60 sm:text-xs">{sub}</p>
+          {retreatHighlights.map(([title, sub, Icon], index) => (
+            <Reveal key={title} delay={index * 60}>
+              <div className="flex h-full items-start gap-2.5 rounded-lg border border-sage/15 bg-cream/65 p-3 sm:items-center sm:gap-3.5 sm:rounded-xl sm:p-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
+                  <Icon size={16} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-ink sm:text-sm">{title}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ink/60 sm:text-xs">{sub}</p>
+                </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section className="px-2.5 py-8 sm:px-8 sm:py-16 lg:px-0 lg:py-22">
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <div className="mb-6 flex flex-col justify-between gap-3 sm:mb-10 sm:flex-row sm:items-end">
-            <SectionHeading
-              align="left"
-              eyebrow="Curated retreat editions"
-              title="Three tranquil sanctuaries across India."
-              description="Each Samsaara edition hosts up to 12 guests so every practice, meal, and silence feels personal."
-            />
-            <a
-              href="/contact#location-map"
-              className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.13em] text-forest transition hover:text-coral"
-            >
-              <span>Tapovan flagship map</span>
-              <ArrowUpRight size={14} />
-            </a>
-          </div>
+          <Reveal>
+            <div className="mb-6 flex flex-col justify-between gap-3 sm:mb-10 sm:flex-row sm:items-end">
+              <SectionHeading
+                align="left"
+                eyebrow="Curated retreat editions"
+                title="Three tranquil sanctuaries across India."
+                description="Each Samsaara edition hosts up to 12 guests so every practice, meal, and silence feels personal."
+              />
+              <a
+                href="/contact#location-map"
+                className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.13em] text-forest transition hover:text-coral"
+              >
+                <span>Tapovan flagship map</span>
+                <ArrowUpRight size={14} />
+              </a>
+            </div>
+          </Reveal>
 
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
             {retreatEditions.map((edition, index) => (
@@ -318,10 +319,12 @@ export default function RetreatsPage() {
 
       <section className="px-2.5 py-8 sm:px-8 sm:py-16 lg:px-0 lg:py-22">
         <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%]">
-          <SectionHeading
-            eyebrow="The sanctuary philosophy"
-            title="A retreat is a return, not an escape."
-          />
+          <Reveal>
+            <SectionHeading
+              eyebrow="The sanctuary philosophy"
+              title="A retreat is a return, not an escape."
+            />
+          </Reveal>
 
           <div className="mt-6 grid gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3">
             {retreatRhythm.map(([step, title, text, Icon], index) => (
@@ -348,35 +351,37 @@ export default function RetreatsPage() {
 
       <section className="relative overflow-hidden bg-forest px-2.5 py-10 text-white sm:px-8 sm:py-18 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(211,181,129,0.18),transparent_34%)]" />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
-            <Leaf size={13} />
-            Priority seasonal invitations
-          </p>
-          <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-5xl">
-            Bring less. Feel more.
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-white/75 sm:mt-4 sm:text-[15px] sm:leading-7">
-            Share which sanctuary fits your travel calendar and receive upcoming dates, room options,
-            and Dehradun arrival support.
-          </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row">
-            <ActionLink href="/contact" light>
-              Request retreat dates
-            </ActionLink>
-            <a
-              href="/contact#location-map"
-              className="group inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.15em] text-sand transition hover:text-white"
-            >
-              <PlaneLanding size={14} />
-              <span>View Rishikesh sanctuary map</span>
-              <ArrowUpRight
-                size={14}
-                className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </a>
+        <Reveal>
+          <div className="relative mx-auto max-w-3xl text-center">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
+              <Leaf size={13} />
+              Priority seasonal invitations
+            </p>
+            <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-5xl">
+              Bring less. Feel more.
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-white/75 sm:mt-4 sm:text-[15px] sm:leading-7">
+              Share which sanctuary fits your travel calendar and receive upcoming dates, room options,
+              and Dehradun arrival support.
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row">
+              <ActionLink href="/contact" light>
+                Request retreat dates
+              </ActionLink>
+              <a
+                href="/contact#location-map"
+                className="group inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.15em] text-sand transition hover:text-white"
+              >
+                <PlaneLanding size={14} />
+                <span>View Rishikesh sanctuary map</span>
+                <ArrowUpRight
+                  size={14}
+                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </a>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <SiteFooter showBanner={false} />

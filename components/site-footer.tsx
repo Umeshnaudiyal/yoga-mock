@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Clock3, Heart, Leaf, Mail, MapPin, Phone } from 'lucide-react';
 import { ActionLink } from './action-link';
+import { Reveal } from './reveal';
 import { FacebookIcon, InstagramIcon, XIcon, YoutubeIcon } from './social-icons';
 
 const asset = 'https://www.riteshyogaa.com';
@@ -72,7 +73,7 @@ export function SiteFooter({ showBanner = true }: { showBanner?: boolean }) {
             alt="Meditation overlooking the valley at Samsaara Retreats"
             className="absolute inset-0 h-full w-full object-cover object-[center_65%] lg:object-center"
           />
-          <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
+          <Reveal className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
             <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-white drop-shadow-[0_2px_10px_rgba(15,28,20,0.45)] sm:text-xs">
               One step away. Come home to yourself
             </p>
@@ -82,12 +83,13 @@ export function SiteFooter({ showBanner = true }: { showBanner?: boolean }) {
             <div className="mt-7">
               <ActionLink href="/retreats">Explore retreats</ActionLink>
             </div>
-          </div>
+          </Reveal>
         </section>
       )}
 
       <div className="mx-auto w-full max-w-[1920px] px-4 pb-8 pt-10 sm:px-8 sm:pt-12 lg:w-[94%] lg:px-0 lg:pt-14 2xl:w-[90%]">
-        <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-12 lg:items-start lg:gap-6 xl:gap-8">
+        <Reveal>
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-12 lg:items-start lg:gap-6 xl:gap-8">
           <div className="col-span-2 flex flex-col items-center border-b border-white/15 pb-8 text-center sm:col-span-3 sm:border-b-0 sm:pb-0 lg:col-span-3 lg:items-start lg:text-left">
             <Link href="/" className="inline-flex items-center">
               <img
@@ -190,6 +192,7 @@ export function SiteFooter({ showBanner = true }: { showBanner?: boolean }) {
             </Link>
           </div>
         </div>
+        </Reveal>
 
         <div className="my-6 flex items-center gap-4 sm:my-8">
           <span className="h-px flex-1 bg-white/30" />

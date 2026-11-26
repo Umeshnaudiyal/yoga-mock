@@ -69,21 +69,20 @@ export default function StoriesPage() {
 
       <section className="border-b border-sage/12 bg-white px-2.5 py-5 sm:px-8 sm:py-8 lg:px-0">
         <div className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-2.5 sm:gap-4 lg:w-[92%] lg:grid-cols-4 lg:gap-5 2xl:w-[88%]">
-          {trustMetrics.map(([value, label, Icon]) => (
-            <div
-              key={label}
-              className="flex items-center gap-2.5 rounded-lg border border-sage/15 bg-cream/65 p-3 sm:gap-3.5 sm:rounded-xl sm:p-4"
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
-                <Icon size={16} />
-              </span>
-              <div className="min-w-0">
-                <p className="font-display text-base font-extrabold text-ink sm:text-xl">
-                  {value}
-                </p>
-                <p className="truncate text-[11px] font-medium text-ink/60 sm:text-xs">{label}</p>
+          {trustMetrics.map(([value, label, Icon], index) => (
+            <Reveal key={label} delay={index * 60}>
+              <div className="flex h-full items-center gap-2.5 rounded-lg border border-sage/15 bg-cream/65 p-3 sm:gap-3.5 sm:rounded-xl sm:p-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-10 sm:w-10">
+                  <Icon size={16} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-base font-extrabold text-ink sm:text-xl">
+                    {value}
+                  </p>
+                  <p className="truncate text-[11px] font-medium text-ink/60 sm:text-xs">{label}</p>
+                </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -132,12 +131,14 @@ export default function StoriesPage() {
           </Reveal>
 
           <div className="mb-10 sm:mb-14">
-            <SectionHeading
-              align="left"
-              eyebrow="Transformation breakdowns"
-              title="Real challenges, measurable relief."
-              description="See how individual pacing adapts to back stiffness, burnout, and beginner hesitation."
-            />
+            <Reveal>
+              <SectionHeading
+                align="left"
+                eyebrow="Transformation breakdowns"
+                title="Real challenges, measurable relief."
+                description="See how individual pacing adapts to back stiffness, burnout, and beginner hesitation."
+              />
+            </Reveal>
 
             <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-5 lg:grid-cols-3">
               {caseStudies.map((study, index) => (
@@ -187,15 +188,17 @@ export default function StoriesPage() {
           </div>
 
           <div className="border-t border-sage/15 pt-8 sm:pt-12">
-            <div className="mb-6 text-center sm:mb-8">
-              <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sage">
-                <HeartHandshake size={13} />
-                Filter by program
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-bold tracking-[-0.03em] text-ink sm:text-4xl">
-                Community reviews around the world
-              </h2>
-            </div>
+            <Reveal>
+              <div className="mb-6 text-center sm:mb-8">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sage">
+                  <HeartHandshake size={13} />
+                  Filter by program
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-bold tracking-[-0.03em] text-ink sm:text-4xl">
+                  Community reviews around the world
+                </h2>
+              </div>
+            </Reveal>
 
             <StoriesShowcase />
           </div>
@@ -203,25 +206,27 @@ export default function StoriesPage() {
       </section>
 
       <section className="bg-forest px-2.5 py-10 text-white sm:px-8 sm:py-18 lg:px-10">
-        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
-            <Sparkles size={13} />
-            Start your own story
-          </p>
-          <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-4xl lg:text-5xl">
-            Feel the difference in your very first session.
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/75 sm:mt-4 sm:text-[15px] sm:leading-7">
-            Tell us about your stiffness, schedule, or experience level and get matched with the
-            right class or 1-on-1 teacher.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            <ActionLink href="/contact" light>
-              Book your free session
-            </ActionLink>
-            <ActionLink href="/#experience">Watch practice preview</ActionLink>
+        <Reveal>
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sand">
+              <Sparkles size={13} />
+              Start your own story
+            </p>
+            <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.035em] sm:mt-4 sm:text-4xl lg:text-5xl">
+              Feel the difference in your very first session.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white/75 sm:mt-4 sm:text-[15px] sm:leading-7">
+              Tell us about your stiffness, schedule, or experience level and get matched with the
+              right class or 1-on-1 teacher.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+              <ActionLink href="/contact" light>
+                Book your free session
+              </ActionLink>
+              <ActionLink href="/#experience">Watch practice preview</ActionLink>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <SiteFooter />
