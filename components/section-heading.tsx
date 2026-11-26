@@ -1,0 +1,3 @@
+export function SectionHeading({ eyebrow, title, description, align = 'center' }: { eyebrow?: string; title: string; description?: string; align?: 'center' | 'left' }) {
+  return <div className={`${align === 'center' ? 'mx-auto text-center' : 'text-left'} max-w-2xl`}>{eyebrow && <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-sage">{eyebrow}</p>}<h2 className="font-display text-3xl font-semibold leading-[1.12] tracking-[-0.035em] text-ink sm:text-4xl lg:text-[46px]">{title}</h2>{description && <p className="mt-5 text-[15px] leading-7 text-ink/65 sm:text-base">{description}</p>}</div>;
+}
