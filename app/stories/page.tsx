@@ -123,7 +123,7 @@ export default function StoriesPage() {
                   Consistent 5-star reviews from online beginners, 1-on-1 clients, and Rishikesh
                   retreat guests.
                 </p>
-                <ActionLink href="/contact" size="sm">
+                <ActionLink modal href="/contact" size="sm">
                   Book free intro
                 </ActionLink>
               </div>
@@ -220,7 +220,7 @@ export default function StoriesPage() {
               right class or 1-on-1 teacher.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-              <ActionLink href="/contact" light>
+              <ActionLink modal href="/contact" light>
                 Book your free session
               </ActionLink>
               <ActionLink href="/#experience">Watch practice preview</ActionLink>

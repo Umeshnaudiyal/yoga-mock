@@ -138,7 +138,7 @@ export default function ResourcesPage() {
                   Share your schedule and goals and we&apos;ll match your exact class or retreat.
                 </p>
               </div>
-              <ActionLink href="/contact" size="sm">
+              <ActionLink modal href="/contact" size="sm">
                 Book free session
               </ActionLink>
             </div>

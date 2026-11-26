@@ -51,14 +51,8 @@ export function SiteHeader() {
       if (event.key === 'Escape') setMenuOpen(false);
     };
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      document.removeEventListener('keydown', handleEscape);
-    };
+    return () => document.removeEventListener('keydown', handleEscape);
   }, [menuOpen]);
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
@@ -133,7 +127,7 @@ export function SiteHeader() {
               isScrolled ? 'scale-95' : 'scale-100'
             }`}
           >
-            <ActionLink href="/contact" size="sm">
+            <ActionLink modal href="/contact" size="sm">
               Book your free session
             </ActionLink>
           </div>
@@ -158,8 +152,8 @@ export function SiteHeader() {
       <div
         aria-hidden={!menuOpen}
         onClick={() => setMenuOpen(false)}
-        className={`fixed inset-0 z-[60] bg-forest/25 backdrop-blur-[2px] transition-all duration-300 lg:hidden ${
-          menuOpen ? 'visible opacity-100' : 'invisible opacity-0'
+        className={`fixed inset-0 z-[60] touch-none bg-forest/30 transition-opacity duration-[260ms] ease-out will-change-[opacity] lg:hidden ${
+          menuOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
 
@@ -167,8 +161,9 @@ export function SiteHeader() {
         id="mobile-nav-drawer"
         aria-label="Mobile navigation"
         aria-hidden={!menuOpen}
-        className={`fixed inset-y-0 right-0 z-[70] flex w-[82vw] max-w-[330px] flex-col overflow-hidden border-l border-white/65 bg-white/75 bg-gradient-to-b from-white/35 via-transparent to-sage-pale/35 shadow-[-24px_0_64px_rgba(24,43,34,0.18)] ring-1 ring-sage/15 backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden ${
-          menuOpen ? 'visible translate-x-0 opacity-100' : 'invisible translate-x-full opacity-0'
+        inert={!menuOpen}
+        className={`fixed inset-y-0 right-0 z-[70] flex w-[82vw] max-w-[330px] flex-col overflow-hidden overscroll-contain border-l border-white/65 bg-white/84 bg-gradient-to-b from-white/35 via-transparent to-sage-pale/35 shadow-[-18px_0_48px_rgba(24,43,34,0.16)] backdrop-blur-[6px] transition-transform duration-[260ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform [backface-visibility:hidden] lg:hidden ${
+          menuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div
@@ -179,7 +174,7 @@ export function SiteHeader() {
         </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-16 top-16 h-48 w-48 rounded-full bg-sage/10 blur-2xl"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(128,155,134,0.14),transparent_55%)]"
         />
 
         <div className="relative z-10 flex items-center justify-between border-b border-sage/15 px-5 py-4">
@@ -212,9 +207,9 @@ export function SiteHeader() {
                   <Link
                     href={href}
                     onClick={() => setMenuOpen(false)}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] transition-all duration-200 ${
+                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] transition-colors duration-150 ${
                       active
-                        ? 'border border-sage/25 bg-sage-pale/75 font-bold text-forest shadow-2xs'
+                        ? 'border border-sage/25 bg-sage-pale/80 font-bold text-forest shadow-2xs'
                         : 'text-ink/80 hover:bg-white/65 hover:text-forest'
                     }`}
                   >
@@ -248,12 +243,13 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="relative z-10 border-t border-sage/15 bg-white/50 px-4 py-4 backdrop-blur-md">
+        <div className="relative z-10 border-t border-sage/15 bg-white/65 px-4 py-4">
           <p className="mb-3 flex items-center justify-center gap-2 text-[11px] font-medium text-ink/60">
             <Clock3 size={13} className="text-sage" />
             <span>Mon – Sat · Live worldwide</span>
           </p>
           <ActionLink
+            modal
             href="/contact"
             size="sm"
             className="w-full justify-between py-2.5 pl-5 pr-2.5"
