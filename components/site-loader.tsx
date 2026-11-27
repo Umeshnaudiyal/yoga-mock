@@ -11,8 +11,8 @@ export function LoaderCanvas({ fading = false }: { fading?: boolean }) {
       role="status"
       aria-live="polite"
       aria-label="Loading Ritesh Yoga"
-      className={`fixed inset-0 z-[120] flex flex-col items-center justify-center overflow-hidden bg-[linear-gradient(155deg,#ebf4ec_0%,#f4f9f4_50%,#e0eee2_100%)] px-5 transition-[opacity,transform] duration-[480ms] ease-[cubic-bezier(0.22,1,0.36,1)] select-none ${
-        fading ? 'pointer-events-none scale-[1.015] opacity-0' : 'pointer-events-auto scale-100 opacity-100'
+      className={`fixed inset-0 z-[120] flex flex-col items-center justify-center overflow-hidden bg-[linear-gradient(155deg,#ebf4ec_0%,#f4f9f4_50%,#e0eee2_100%)] px-5 transition-opacity duration-[420ms] ease-out will-change-[opacity] select-none ${
+        fading ? 'pointer-events-none opacity-0' : 'pointer-events-auto opacity-100'
       }`}
     >
       <div
@@ -22,66 +22,71 @@ export function LoaderCanvas({ fading = false }: { fading?: boolean }) {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[#235c3d]/[0.055]"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[#235c3d]/[0.05]"
       >
-        <FooterMandala className="h-[340px] w-[340px] sm:h-[460px] sm:w-[460px]" />
+        <FooterMandala
+          animate={false}
+          className="h-[340px] w-[340px] sm:h-[460px] sm:w-[460px]"
+        />
       </div>
 
       <div className="relative z-10 flex flex-col items-center text-center">
         <div className="relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32">
           <span
             aria-hidden="true"
-            className="animate-sun-breathe absolute inset-1 rounded-full bg-[#80a888]/18 blur-md"
+            className="pointer-events-none absolute -inset-2 rounded-full bg-[radial-gradient(circle,rgba(128,170,136,0.26),transparent_68%)]"
           />
 
-          <svg
-            viewBox="0 0 120 120"
-            className="relative h-24 w-24 sm:h-28 sm:w-28"
-            aria-hidden="true"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="rgba(35, 92, 61, 0.12)"
-              strokeWidth="2.4"
-            />
+          <div className="relative h-24 w-24 sm:h-28 sm:w-28" aria-hidden="true">
+            <svg viewBox="0 0 120 120" className="h-full w-full">
+              <circle
+                cx="60"
+                cy="60"
+                r="52"
+                fill="none"
+                stroke="rgba(35, 92, 61, 0.12)"
+                strokeWidth="2.4"
+              />
+            </svg>
 
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="#235c3d"
-              strokeWidth="3"
-              strokeDasharray="96 240"
-              strokeLinecap="round"
-              style={{
-                transformBox: 'view-box',
-                transformOrigin: '60px 60px',
-                animation: 'orbit-cw 1.55s linear infinite',
-              }}
-            />
+            <div
+              className="absolute inset-0 will-change-transform"
+              style={{ animation: 'orbit-cw 1.5s linear infinite' }}
+            >
+              <svg viewBox="0 0 120 120" className="h-full w-full">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  stroke="#235c3d"
+                  strokeWidth="3"
+                  strokeDasharray="96 240"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
 
-            <circle
-              cx="60"
-              cy="60"
-              r="45"
-              fill="none"
-              stroke="#6e9878"
-              strokeWidth="1.6"
-              strokeDasharray="62 220"
-              strokeLinecap="round"
-              style={{
-                transformBox: 'view-box',
-                transformOrigin: '60px 60px',
-                animation: 'orbit-ccw 2.35s linear infinite',
-              }}
-            />
-          </svg>
+            <div
+              className="absolute inset-0 will-change-transform"
+              style={{ animation: 'orbit-ccw 2.2s linear infinite' }}
+            >
+              <svg viewBox="0 0 120 120" className="h-full w-full">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="45"
+                  fill="none"
+                  stroke="#6e9878"
+                  strokeWidth="1.6"
+                  strokeDasharray="62 220"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </div>
 
-          <div className="absolute flex h-16 w-16 items-center justify-center rounded-full border border-sage/20 bg-white shadow-[0_14px_38px_rgba(25,56,42,0.12)] sm:h-[72px] sm:w-[72px]">
+          <div className="absolute flex h-16 w-16 items-center justify-center rounded-full border border-sage/20 bg-white shadow-[0_12px_30px_rgba(25,56,42,0.12)] sm:h-[72px] sm:w-[72px]">
             <svg viewBox="0 0 40 40" className="h-9 w-9 sm:h-10 sm:w-10" aria-hidden="true">
               <circle cx="20" cy="11.5" r="2.7" fill="#235c3d" />
               <path
@@ -118,9 +123,9 @@ export function LoaderCanvas({ fading = false }: { fading?: boolean }) {
             Ritesh Yoga
           </p>
           <span className="inline-flex items-center gap-1" aria-hidden="true">
-            <span className="animate-dot-wave h-1.5 w-1.5 rounded-full bg-[#235c3d]" />
-            <span className="animate-dot-wave h-1.5 w-1.5 rounded-full bg-[#4c7d5c] [animation-delay:180ms]" />
-            <span className="animate-dot-wave h-1.5 w-1.5 rounded-full bg-[#80a888] [animation-delay:360ms]" />
+            <span className="animate-dot-wave will-change-transform h-1.5 w-1.5 rounded-full bg-[#235c3d]" />
+            <span className="animate-dot-wave will-change-transform h-1.5 w-1.5 rounded-full bg-[#4c7d5c] [animation-delay:180ms]" />
+            <span className="animate-dot-wave will-change-transform h-1.5 w-1.5 rounded-full bg-[#80a888] [animation-delay:360ms]" />
           </span>
         </div>
 
@@ -132,7 +137,7 @@ export function LoaderCanvas({ fading = false }: { fading?: boolean }) {
           aria-hidden="true"
           className="mt-4 h-[2.5px] w-28 overflow-hidden rounded-full bg-[#235c3d]/12 sm:w-32"
         >
-          <div className="animate-shimmer-slide h-full w-14 rounded-full bg-gradient-to-r from-[#80a888] via-[#235c3d] to-[#80a888]" />
+          <div className="animate-shimmer-slide will-change-transform h-full w-14 rounded-full bg-gradient-to-r from-[#80a888] via-[#235c3d] to-[#80a888]" />
         </div>
       </div>
     </div>
@@ -149,6 +154,7 @@ export function SiteLoader() {
   const startedAtRef = useRef(0);
   const isTransitioningRef = useRef(true);
   const fadeTimerRef = useRef<number | null>(null);
+  const fadeFrameRef = useRef<number | null>(null);
   const unmountTimerRef = useRef<number | null>(null);
   const failsafeTimerRef = useRef<number | null>(null);
 
@@ -156,6 +162,10 @@ export function SiteLoader() {
     if (fadeTimerRef.current !== null) {
       window.clearTimeout(fadeTimerRef.current);
       fadeTimerRef.current = null;
+    }
+    if (fadeFrameRef.current !== null) {
+      window.cancelAnimationFrame(fadeFrameRef.current);
+      fadeFrameRef.current = null;
     }
     if (unmountTimerRef.current !== null) {
       window.clearTimeout(unmountTimerRef.current);
@@ -179,18 +189,20 @@ export function SiteLoader() {
 
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const effectiveDwell = prefersReducedMotion ? 80 : minDwellMs;
-      const fadeDurationMs = prefersReducedMotion ? 100 : 480;
+      const fadeDurationMs = prefersReducedMotion ? 100 : 420;
       const elapsed = performance.now() - startedAtRef.current;
       const delayBeforeFade = Math.max(0, effectiveDwell - elapsed);
 
       fadeTimerRef.current = window.setTimeout(() => {
-        setIsFading(true);
         fadeTimerRef.current = null;
-
-        unmountTimerRef.current = window.setTimeout(() => {
-          setIsMounted(false);
-          unmountTimerRef.current = null;
-        }, fadeDurationMs);
+        fadeFrameRef.current = window.requestAnimationFrame(() => {
+          fadeFrameRef.current = null;
+          setIsFading(true);
+          unmountTimerRef.current = window.setTimeout(() => {
+            setIsMounted(false);
+            unmountTimerRef.current = null;
+          }, fadeDurationMs);
+        });
       }, delayBeforeFade);
     },
     []

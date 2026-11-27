@@ -6,17 +6,27 @@ import { useBookingModal } from './booking-modal';
 const LOTUS_ANGLES = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] as const;
 
 /** Slowly rotating geometric lotus mandala SVG watermark behind the footer header. */
-export function FooterMandala({ className = '' }: { className?: string }) {
+export function FooterMandala({
+  className = '',
+  animate = true,
+}: {
+  className?: string;
+  animate?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 440 440"
       aria-hidden="true"
       className={`pointer-events-none select-none ${className}`}
-      style={{
-        transformBox: 'view-box',
-        transformOrigin: '220px 220px',
-        animation: 'orbit-cw 68s linear infinite',
-      }}
+      style={
+        animate
+          ? {
+              transformBox: 'view-box',
+              transformOrigin: '220px 220px',
+              animation: 'orbit-cw 68s linear infinite',
+            }
+          : undefined
+      }
     >
       <circle
         cx="220"
