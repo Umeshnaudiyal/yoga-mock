@@ -25,6 +25,15 @@
 
   html {
     scroll-behavior: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   body {
@@ -32,6 +41,8 @@
     background: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -113,6 +124,67 @@
   50% { transform: translateY(9px) rotate(-3deg); }
 }
 
+@keyframes orbit-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes progress-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes hatha-balance {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes spine-pulse {
+  0%, 100% { opacity: 0.34; transform: scaleX(0.95); }
+  45% { opacity: 1; transform: scaleX(1.06); }
+}
+
+@keyframes river-drift {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(14px); }
+}
+
+@keyframes river-drift-reverse {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(-14px); }
+}
+
+@keyframes sun-breathe {
+  0%, 100% { opacity: 0.78; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.07); }
+}
+
+@keyframes bird-soar {
+  0% {
+    transform: translate3d(-90px, 14px, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.78;
+  }
+  50% {
+    transform: translate3d(210px, -12px, 0);
+    opacity: 0.85;
+  }
+  88% {
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate3d(520px, -28px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes wing-flap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.32); }
+}
+
 @layer utilities {
   .text-sage { color: #6e8d75; }
   .font-display { font-family: var(--font-display); }
@@ -121,6 +193,13 @@
   .animate-slow-zoom { animation: slow-zoom 18s ease-out both; }
   .animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
   .animate-float-reverse { animation: float-reverse 11s ease-in-out infinite; }
+  .animate-hatha-balance { animation: hatha-balance 6.5s ease-in-out infinite; }
+  .animate-spine-pulse { animation: spine-pulse 2.4s ease-in-out infinite; }
+  .animate-progress-fill { animation: progress-fill 5.6s linear both; }
+  .animate-river-drift { animation: river-drift 9s ease-in-out infinite; }
+  .animate-river-drift-reverse { animation: river-drift-reverse 11s ease-in-out infinite; }
+  .animate-sun-breathe { animation: sun-breathe 6s ease-in-out infinite; }
+  .animate-wing-flap { animation: wing-flap 1.4s ease-in-out infinite; }
   .animate-stagger > * { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .animate-stagger > *:nth-child(2) { animation-delay: 120ms; }
   .animate-stagger > *:nth-child(3) { animation-delay: 240ms; }

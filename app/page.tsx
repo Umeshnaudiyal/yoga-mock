@@ -20,11 +20,13 @@ import {
 } from 'lucide-react';
 import { ActionLink } from '../components/action-link';
 import { ExperienceSection } from '../components/experience-section';
+import { HisCraftSection } from '../components/his-craft-section';
 import { Reveal } from '../components/reveal';
 import { SiteFooter } from '../components/site-footer';
 import { SiteHeader } from '../components/site-header';
 import { StatsBar } from '../components/stats-bar';
 import { StoriesSection } from '../components/stories-section';
+import { TeachingStepsSection } from '../components/teaching-steps-section';
 
 const asset = 'https://www.riteshyogaa.com';
 const cdn = 'https://cdn.riteshyogaa.com';
@@ -123,7 +125,7 @@ export default function Home() {
       <ExperienceSection />
 
       <section id="programs" className="bg-sage-pale px-3 py-10 sm:px-8 sm:py-18 lg:px-0 lg:py-24">
-        <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%] sm:h-[80vh]">
+        <div className="mx-auto w-full max-w-[1920px] lg:w-[92%] 2xl:w-[88%] sm:h-[90vh]">
           <Reveal>
             <SectionHeading title="Find the right path for you" description="Start with what you need today. Build a practice that supports your body, your energy, and your life." />
           </Reveal>
@@ -168,6 +170,10 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      <TeachingStepsSection />
+
+      <HisCraftSection />
 
       <section className="relative isolate flex min-h-[420px] items-center bg-forest px-3 py-12 text-white [clip-path:inset(0)] sm:min-h-[520px] sm:px-8 sm:py-20 lg:min-h-[600px] lg:px-0 lg:py-28">
         <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">

@@ -1,23 +1,31 @@
 'use client';
 
-import { FormEvent, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  CSSProperties,
+  FormEvent,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Activity,
   ArrowRight,
-  CalendarCheck,
   Check,
-  Clock3,
-  Globe2,
+  Flower2,
   LoaderCircle,
-  Lock,
-  Mail,
-  MessageSquare,
+  MessageCircle,
   Phone,
-  Sparkles,
-  User,
+  ShieldCheck,
+  Sun,
+  Users,
   X,
 } from 'lucide-react';
+import { COUNTRY_OPTIONS, CountryOption, DialPhoneInput } from './country-dial';
+import { CustomSelect, CustomSelectOption } from './custom-select';
 
 type BookingContextValue = {
   openBooking: (defaultInterest?: string) => void;
@@ -33,45 +41,39 @@ export function useBookingModal() {
   return useContext(BookingModalContext);
 }
 
-const DIAL_OPTIONS = ['+91', '+1', '+44', '+971', '+65', '+61', '+49', '+33', '+81'] as const;
+const INTEREST_OPTIONS: readonly CustomSelectOption[] = [
+  { value: '1-on-1 Free Trial', label: '1-on-1 Trial', hint: 'Personal intro session' },
+  { value: 'Live Group Classes', label: 'Live Group', hint: 'Small weekly cohorts' },
+  { value: 'Ashtanga Vinyasa YTTC', label: 'Ashtanga YTTC', hint: 'Teacher certification' },
+  { value: '200 Hour Teacher Training', label: '200-Hr YTTC', hint: 'RYT-200 foundation' },
+  { value: 'Beginner Yoga Journey', label: 'Beginner Yoga', hint: 'Guided first steps' },
+  { value: 'Samsaara Retreats', label: 'Retreats', hint: 'Himalayan immersions' },
+];
 
-const TIMEZONE_OPTIONS = [
-  'India (IST)',
-  'UK / Europe (GMT / CET)',
-  'USA / Canada (EST / PST)',
-  'UAE / Gulf (GST)',
-  'Singapore / Australia (SGT / AEST)',
-  'Other timezone',
-] as const;
+const LOCATION_OPTIONS: readonly CustomSelectOption[] = [
+  { value: 'Live Online', label: 'Live Online', hint: 'Worldwide via Zoom' },
+  { value: 'Rishikesh, India', label: 'Rishikesh, India', hint: 'Tapovan campus' },
+  { value: 'Hybrid Program', label: 'Hybrid Program', hint: 'Online + Rishikesh' },
+];
 
-const INTEREST_OPTIONS = [
-  '1-on-1 Free Trial',
-  'Live Group Classes',
-  'Beginner Yoga Journey',
-  'Back Pain & Posture Relief',
-  'Teacher Training (YTTC)',
-  'Samsaara Retreats',
-] as const;
-
-const EXPERIENCE_OPTIONS = [
-  'Complete beginner',
-  'Beginner (0–6 months)',
-  'Intermediate (6m–2y)',
-  'Regular practitioner (2y+)',
-] as const;
-
-const TIME_CHIPS = ['Morning', 'Midday', 'Evening', 'Weekend'] as const;
+const DATE_OPTIONS: readonly CustomSelectOption[] = [
+  { value: 'Flexible · Next available', label: 'Flexible · Next available', hint: 'Fastest batch match' },
+  { value: 'Morning Window', label: 'Morning Window', hint: 'Sunrise & early slots' },
+  { value: 'Midday / Afternoon', label: 'Midday / Afternoon', hint: 'Daytime schedule' },
+  { value: 'Evening Window', label: 'Evening Window', hint: 'After-work relaxation' },
+  { value: 'Weekend Batch', label: 'Weekend Batch', hint: 'Saturday & Sunday' },
+  { value: 'Upcoming Monthly Intake', label: 'Upcoming Monthly Intake', hint: 'YTTC & retreats' },
+];
 
 type ModalFields = {
   fullName: string;
   email: string;
-  dialCode: string;
   phone: string;
-  timezone: string;
   interest: string;
-  experience: string;
-  preferredSlot: string;
+  location: string;
+  preferredDates: string;
   goalNote: string;
+  consent: boolean;
 };
 
 type RequiredModalKey = 'fullName' | 'email' | 'phone';
@@ -79,33 +81,68 @@ type RequiredModalKey = 'fullName' | 'email' | 'phone';
 const INITIAL_MODAL_FIELDS: ModalFields = {
   fullName: '',
   email: '',
-  dialCode: '+91',
   phone: '',
-  timezone: 'India (IST)',
   interest: '1-on-1 Free Trial',
-  experience: 'Complete beginner',
-  preferredSlot: 'Morning',
+  location: 'Live Online',
+  preferredDates: '',
   goalNote: '',
+  consent: true,
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EXIT_DURATION_MS = 680;
 
-const COMPACT_FIELD =
-  'min-h-[38px] w-full min-w-0 rounded-lg border bg-white px-2.5 py-1.5 text-xs text-ink transition focus:outline-none focus:ring-2 sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-[13px]';
-
-function fieldBorder(hasError?: boolean) {
-  return hasError
-    ? 'border-coral/70 ring-2 ring-coral/15 focus:border-coral'
-    : 'border-sage/20 hover:border-sage/40 focus:border-sage focus:ring-sage/15';
+function fieldBoxClass(hasError?: boolean) {
+  return `rounded-lg border px-3 py-2 transition-all duration-300 focus-within:bg-white focus-within:ring-2 sm:rounded-xl sm:px-3.5 sm:py-2 ${
+    hasError
+      ? 'border-coral/70 bg-coral/[0.04] ring-2 ring-coral/15 focus-within:border-coral'
+      : 'border-sage/18 bg-sage-pale/45 hover:border-sage/35 focus-within:border-forest/45 focus-within:ring-sage/15'
+  }`;
 }
 
-/** Provides the global Book Your Free Session modal across every route. */
+function revealMotion(entered: boolean, delayMs: number): {
+  className: string;
+  style: CSSProperties;
+} {
+  return {
+    className: `transition-[opacity,transform] duration-[680ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+      entered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+    }`,
+    style: { transitionDelay: entered ? `${delayMs}ms` : '0ms' },
+  };
+}
+
+/** Global enquiry popup modal with serene slow animations and scroll-behavior management. */
 export function BookingModalProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isEntered, setIsEntered] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<
+    'phone' | 'interest' | 'location' | 'dates' | null
+  >(null);
   const [fields, setFields] = useState<ModalFields>(INITIAL_MODAL_FIELDS);
+  const [dialCountry, setDialCountry] = useState<CountryOption>(COUNTRY_OPTIONS[0]);
   const [errors, setErrors] = useState<Partial<Record<RequiredModalKey, string>>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
+
+  const closeTimerRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+
+  const clearScheduledMotion = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    if (frameRef.current !== null) {
+      window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => clearScheduledMotion();
+  }, [clearScheduledMotion]);
 
   useEffect(() => {
     if (!window.location.hash) {
@@ -173,33 +210,83 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
     return () => document.removeEventListener('click', handleSamePageAnchorClick, true);
   }, []);
 
-  const openBooking = useCallback((defaultInterest?: string) => {
-    setStatus('idle');
-    setErrors({});
-    if (defaultInterest) {
-      setFields((prev) => ({ ...prev, interest: defaultInterest }));
-    }
-    setIsOpen(true);
-  }, []);
+  const openBooking = useCallback(
+    (defaultInterest?: string) => {
+      clearScheduledMotion();
+      setStatus('idle');
+      setErrors({});
+      if (defaultInterest) {
+        setFields((prev) => ({ ...prev, interest: defaultInterest }));
+      }
+      setIsMounted(true);
+      setIsOpen(true);
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion) {
+        setIsEntered(true);
+        return;
+      }
+
+      frameRef.current = window.requestAnimationFrame(() => {
+        frameRef.current = window.requestAnimationFrame(() => {
+          setIsEntered(true);
+          frameRef.current = null;
+        });
+      });
+    },
+    [clearScheduledMotion]
+  );
 
   const closeBooking = useCallback(() => {
+    clearScheduledMotion();
+    setActiveDropdown(null);
     setIsOpen(false);
-  }, []);
+    setIsEntered(false);
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      setIsMounted(false);
+      return;
+    }
+
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsMounted(false);
+      closeTimerRef.current = null;
+    }, EXIT_DURATION_MS);
+  }, [clearScheduledMotion]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isMounted) return;
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key === 'Escape') closeBooking();
     };
 
+    const scrollbarGap = window.innerWidth - document.documentElement.clientWidth;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevBodyPadding = document.body.style.paddingRight;
+
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
+    if (scrollbarGap > 0) {
+      document.body.style.paddingRight = `${scrollbarGap}px`;
+    }
+
     document.addEventListener('keydown', handleEscape);
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.paddingRight = prevBodyPadding;
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isMounted, closeBooking]);
 
   const updateField = <K extends keyof ModalFields>(key: K, value: ModalFields[K]) => {
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -212,10 +299,10 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
     event.preventDefault();
     const nextErrors: Partial<Record<RequiredModalKey, string>> = {};
     if (!fields.fullName.trim()) nextErrors.fullName = 'Please enter your name.';
-    if (!EMAIL_RE.test(fields.email.trim())) nextErrors.email = 'Enter a valid email.';
     if (fields.phone.replace(/\D/g, '').length < 6) {
-      nextErrors.phone = 'Enter your WhatsApp or mobile number.';
+      nextErrors.phone = 'Please enter your phone number.';
     }
+    if (!EMAIL_RE.test(fields.email.trim())) nextErrors.email = 'Please enter your email address.';
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -225,346 +312,504 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
   };
 
   const handleResetAndClose = () => {
-    setFields(INITIAL_MODAL_FIELDS);
-    setErrors({});
-    setStatus('idle');
-    setIsOpen(false);
+    closeBooking();
+    window.setTimeout(() => {
+      setFields(INITIAL_MODAL_FIELDS);
+      setDialCountry(COUNTRY_OPTIONS[0]);
+      setErrors({});
+      setStatus('idle');
+    }, EXIT_DURATION_MS);
   };
+
+  const asideHeaderReveal = revealMotion(isEntered, 120);
+  const asideFooterReveal = revealMotion(isEntered, 460);
+  const formHeaderReveal = revealMotion(isEntered, 140);
+  const fieldNameReveal = revealMotion(isEntered, 200);
+  const fieldPhoneReveal = revealMotion(isEntered, 260);
+  const fieldEmailReveal = revealMotion(isEntered, 320);
+  const fieldProgramReveal = revealMotion(isEntered, 380);
+  const fieldDatesReveal = revealMotion(isEntered, 440);
+  const fieldQueryReveal = revealMotion(isEntered, 500);
+  const fieldActionReveal = revealMotion(isEntered, 560);
 
   return (
     <BookingModalContext.Provider value={{ openBooking, closeBooking }}>
       {children}
 
-      {isOpen && (
+      {isMounted && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="booking-modal-title"
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-forest/45 p-2 backdrop-blur-xs sm:items-center sm:p-5"
+          aria-label="Begin your yogic journey"
+          aria-hidden={!isOpen}
           onClick={closeBooking}
+          className={`fixed inset-0 z-[90] flex items-end justify-center p-0 transition-[opacity,backdrop-filter,background-color] duration-[720ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:items-center md:p-5 ${
+            isEntered
+              ? 'pointer-events-auto bg-forest/55 opacity-100 backdrop-blur-[5px]'
+              : 'pointer-events-none bg-forest/0 opacity-0 backdrop-blur-none'
+          }`}
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="animate-fade-up flex max-h-[92dvh] w-full max-w-[500px] flex-col overflow-hidden rounded-xl border border-sage/20 bg-white shadow-[0_26px_70px_rgba(18,34,24,0.3)] sm:rounded-2xl"
+            className={`grid max-h-[94dvh] w-full max-w-[850px] overflow-hidden rounded-t-2xl border border-b-0 border-sage/20 bg-white shadow-[0_32px_85px_rgba(14,28,20,0.36)] transition-[opacity,transform] duration-[780ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity] md:grid-cols-[0.86fr_1.14fr] md:rounded-2xl md:border-b ${
+              isEntered
+                ? 'translate-y-0 scale-100 opacity-100'
+                : 'translate-y-full opacity-0 md:translate-y-9 md:scale-[0.96]'
+            }`}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-sage/12 bg-sage-pale/65 px-3.5 py-2.5 sm:px-5 sm:py-3.5">
-              <div className="flex min-w-0 items-center gap-2.5">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-forest text-sand sm:h-8 sm:w-8">
-                  <CalendarCheck size={14} />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-sage sm:text-[10px]">
-                    Free 15-min live intro
+            <aside className="relative hidden flex-col justify-between overflow-hidden bg-[linear-gradient(155deg,#19382a_0%,#214c38_55%,#163023_100%)] p-7 text-white md:flex">
+              <Flower2
+                size={210}
+                strokeWidth={0.7}
+                aria-hidden="true"
+                className="animate-float-slow pointer-events-none absolute -bottom-12 -right-12 text-white/[0.06]"
+              />
+
+              <div className="relative z-10">
+                <div className={asideHeaderReveal.className} style={asideHeaderReveal.style}>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-sand backdrop-blur-xs">
+                    <Flower2 size={20} strokeWidth={1.6} />
+                  </span>
+
+                  <p className="mt-5 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#9be0ad]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#9be0ad]" />
+                    <span>Admissions &amp; Sessions Open 2026–27</span>
                   </p>
-                  <h2
-                    id="booking-modal-title"
-                    className="truncate font-display text-sm font-extrabold tracking-[-0.02em] text-ink sm:text-base"
-                  >
-                    Book your free yoga session
-                  </h2>
+
+                  <h3 className="mt-2.5 font-display text-[28px] font-semibold leading-[1.12] tracking-[-0.03em] text-white">
+                    Begin your <span className="text-[#8ed39f]">yogic journey</span>
+                  </h3>
+
+                  <p className="mt-3 text-[13px] leading-5 text-white/78">
+                    Tell us the class, training batch, or intro session that suits you. Our team
+                    replies personally with schedule, fees, and stay details.
+                  </p>
+                </div>
+
+                <div className="mt-6 divide-y divide-white/10 border-t border-white/10">
+                  {[
+                    {
+                      icon: ShieldCheck,
+                      title: 'Yoga Alliance Certified',
+                      detail: 'RYT-100, 200, 300 & 500 programs',
+                    },
+                    {
+                      icon: Users,
+                      title: 'Small Personal Batches',
+                      detail: 'Real-time posture & breath guidance',
+                    },
+                    {
+                      icon: Sun,
+                      title: 'Satvik Living & Online',
+                      detail: 'Practice live globally or in Rishikesh',
+                    },
+                  ].map(({ icon: Icon, title, detail }, index) => {
+                    const rowReveal = revealMotion(isEntered, 220 + index * 85);
+                    return (
+                      <div
+                        key={title}
+                        className={`flex items-center gap-3 py-3 ${rowReveal.className}`}
+                        style={rowReveal.style}
+                      >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/8 text-[#9be0ad]">
+                          <Icon size={15} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white">{title}</p>
+                          <p className="text-[11px] text-white/65">{detail}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={closeBooking}
-                aria-label="Close booking popup"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-sage/20 bg-white text-ink/70 transition hover:bg-forest hover:text-white sm:h-8 sm:w-8"
+              <div
+                className={`relative z-10 mt-5 border-t border-white/10 pt-4 ${asideFooterReveal.className}`}
+                style={asideFooterReveal.style}
               >
-                <X size={15} />
-              </button>
-            </div>
-
-            {status === 'submitted' ? (
-              <div className="animate-fade-up overflow-y-auto px-4 py-6 text-center sm:px-6 sm:py-8">
-                <span className="animate-soft-pulse mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-sage text-white">
-                  <Check size={22} strokeWidth={2.5} />
-                </span>
-                <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-sage">
-                  Request confirmed
-                </p>
-                <h3 className="mt-1 font-display text-xl font-extrabold text-ink sm:text-2xl">
-                  Namaste, {fields.fullName.trim().split(/\s+/)[0] || 'friend'}.
-                </h3>
-                <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-ink/65 sm:text-[13px]">
-                  We&apos;ll send your free session link on WhatsApp ({fields.dialCode}{' '}
-                  {fields.phone.trim()}) and <span className="font-semibold text-forest">{fields.email}</span>{' '}
-                  within 24 hours.
-                </p>
-
-                <dl className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-sage/15 bg-cream/70 p-3 text-left text-[11px]">
-                  <div>
-                    <dt className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/45">
-                      Focus
-                    </dt>
-                    <dd className="mt-0.5 truncate font-semibold text-ink">{fields.interest}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/45">
-                      Slot &amp; zone
-                    </dt>
-                    <dd className="mt-0.5 truncate font-semibold text-ink">
-                      {fields.preferredSlot} · {fields.timezone.split(' ')[0]}
-                    </dd>
-                  </div>
-                </dl>
-
-                <button
-                  type="button"
-                  onClick={handleResetAndClose}
-                  className="mt-5 inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-lg bg-forest px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-sage sm:w-auto"
-                >
-                  <span>Done</span>
-                  <Check size={14} />
-                </button>
+                <p className="mb-2.5 text-[11px] font-medium text-white/65">Rather talk first?</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href="https://wa.me/918888888888"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-xs font-bold text-forest shadow-sm transition hover:bg-sand"
+                  >
+                    <MessageCircle size={13} className="text-[#235c3d]" />
+                    <span>WhatsApp</span>
+                  </a>
+                  <a
+                    href="tel:+918888888888"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/8 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/16"
+                  >
+                    <Phone size={12} />
+                    <span>+91 88888 88888</span>
+                  </a>
+                </div>
               </div>
-            ) : (
-              <form
-                onSubmit={handleSubmit}
-                noValidate
-                className="overflow-y-auto px-3.5 py-3 sm:px-5 sm:py-4"
-              >
-                <p className="mb-3 text-[11px] leading-4 text-ink/60 sm:text-xs sm:leading-5">
-                  Share a few quick details so we can match the right session time and posture pacing for you.
-                </p>
+            </aside>
 
-                <div className="space-y-2.5 sm:space-y-3">
-                  <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-                    <div>
-                      <label
-                        htmlFor="modal-name"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
-                      >
-                        <User size={11} className="text-sage" />
-                        Full name <span className="text-coral">*</span>
-                      </label>
-                      <input
-                        id="modal-name"
-                        type="text"
-                        size={1}
-                        autoComplete="name"
-                        placeholder="Your full name"
-                        value={fields.fullName}
-                        onChange={(event) => updateField('fullName', event.target.value)}
-                        className={`${COMPACT_FIELD} ${fieldBorder(Boolean(errors.fullName))}`}
-                      />
-                      {errors.fullName && (
-                        <p className="mt-1 text-[10px] font-medium text-coral">{errors.fullName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="modal-email"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
-                      >
-                        <Mail size={11} className="text-sage" />
-                        Email <span className="text-coral">*</span>
-                      </label>
-                      <input
-                        id="modal-email"
-                        type="email"
-                        size={1}
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        value={fields.email}
-                        onChange={(event) => updateField('email', event.target.value)}
-                        className={`${COMPACT_FIELD} ${fieldBorder(Boolean(errors.email))}`}
-                      />
-                      {errors.email && (
-                        <p className="mt-1 text-[10px] font-medium text-coral">{errors.email}</p>
-                      )}
-                    </div>
+            <div className="flex max-h-[94dvh] flex-col overflow-hidden bg-white md:max-h-[93dvh]">
+              <div className="relative shrink-0 overflow-hidden bg-[linear-gradient(150deg,#183629_0%,#214c38_58%,#152f22_100%)] px-4 pb-4 pt-2.5 text-white md:hidden">
+                <Flower2
+                  size={136}
+                  strokeWidth={0.75}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-7 right-6 text-white/[0.08]"
+                />
+                <div
+                  aria-hidden="true"
+                  className="mx-auto mb-3 h-1 w-9 rounded-full bg-white/35"
+                />
+                <div className="relative z-10 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-display text-[19px] font-extrabold leading-[1.12] tracking-[-0.03em] text-white">
+                      Begin your
+                      <span className="block text-[#8ed39f]">yogic journey</span>
+                    </p>
                   </div>
 
-                  <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-                    <div>
-                      <label
-                        htmlFor="modal-phone"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
+                  <div className="flex shrink-0 items-center gap-2">
+                    <a
+                      href="https://wa.me/918888888888"
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Chat on WhatsApp"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#235c3d] shadow-md transition active:scale-95"
+                    >
+                      <MessageCircle size={17} strokeWidth={2} />
+                    </a>
+                    <a
+                      href="tel:+918888888888"
+                      aria-label="Call +91 88888 88888"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-xs transition hover:bg-white/20 active:scale-95"
+                    >
+                      <Phone size={15} strokeWidth={2} />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={closeBooking}
+                      aria-label="Close booking popup"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-xs transition hover:bg-white/20 active:scale-95"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-3.5 pb-5 pt-3.5 sm:px-6 sm:py-5 md:px-7 md:py-6">
+                <div
+                  className={`hidden items-start justify-between gap-3 md:flex ${formHeaderReveal.className}`}
+                  style={formHeaderReveal.style}
+                >
+                  <div>
+                    <h2
+                      id="booking-modal-title"
+                      className="font-display text-[22px] font-extrabold tracking-[-0.025em] text-ink"
+                    >
+                      Reserve your spot
+                    </h2>
+                    <p className="mt-0.5 text-[13px] text-ink/58">
+                      Limited seats in upcoming live classes and training batches.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={closeBooking}
+                    aria-label="Close booking popup"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sage/20 bg-sage-pale/60 text-ink/70 transition hover:bg-forest hover:text-white"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+
+                {status === 'submitted' ? (
+                  <div className="animate-fade-up py-7 text-center sm:py-10">
+                    <span className="animate-soft-pulse mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-forest text-sand">
+                      <Check size={24} strokeWidth={2.5} />
+                    </span>
+                    <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-sage">
+                      Enquiry confirmed
+                    </p>
+                    <h3 className="mt-1 font-display text-2xl font-extrabold text-ink">
+                      Namaste, {fields.fullName.trim().split(/\s+/)[0] || 'friend'}.
+                    </h3>
+                    <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-ink/65 sm:text-sm">
+                      Thank you for reaching out. Our team will connect on WhatsApp (
+                      {dialCountry.dial} {fields.phone.trim()}) and{' '}
+                      <span className="font-semibold text-forest">{fields.email}</span> within 24
+                      hours.
+                    </p>
+
+                    <dl className="mx-auto mt-5 grid max-w-sm grid-cols-2 gap-2.5 rounded-xl border border-sage/15 bg-sage-pale/45 p-3.5 text-left text-xs">
+                      <div>
+                        <dt className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                          Program
+                        </dt>
+                        <dd className="mt-0.5 truncate font-semibold text-ink">{fields.interest}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                          Location
+                        </dt>
+                        <dd className="mt-0.5 truncate font-semibold text-ink">{fields.location}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-6 flex flex-col items-center justify-center gap-2.5 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={handleResetAndClose}
+                        className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-full bg-forest px-6 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-sage sm:w-auto"
                       >
-                        <Phone size={11} className="text-sage" />
-                        WhatsApp / Phone <span className="text-coral">*</span>
-                      </label>
-                      <div
-                        className={`flex min-h-[38px] items-center rounded-lg border bg-white transition focus-within:ring-2 sm:min-h-[40px] ${fieldBorder(
-                          Boolean(errors.phone)
-                        )}`}
+                        <span>Done</span>
+                        <Check size={14} />
+                      </button>
+                      <Link
+                        href="/classes"
+                        onClick={closeBooking}
+                        className="inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-full border border-sage/25 px-5 py-2 text-xs font-bold uppercase tracking-[0.1em] text-forest transition hover:bg-sage-pale sm:w-auto"
                       >
-                        <select
-                          aria-label="Country dial code"
-                          value={fields.dialCode}
-                          onChange={(event) => updateField('dialCode', event.target.value)}
-                          className="shrink-0 rounded-l-lg bg-sage-pale/45 px-2 py-1.5 text-[11px] font-bold text-forest focus:outline-none sm:text-xs"
+                        <span>Browse classes</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} noValidate className="mt-0 space-y-2.5 sm:space-y-3 md:mt-4">
+                    <div className={fieldNameReveal.className} style={fieldNameReveal.style}>
+                      <div className={fieldBoxClass(Boolean(errors.fullName))}>
+                        <label
+                          htmlFor="modal-name"
+                          className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
                         >
-                          {DIAL_OPTIONS.map((code) => (
-                            <option key={code} value={code}>
-                              {code}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="h-4 w-px shrink-0 bg-sage/20" aria-hidden="true" />
+                          Full Name <span className="text-coral">*</span>
+                        </label>
                         <input
-                          id="modal-phone"
-                          type="tel"
+                          id="modal-name"
+                          type="text"
                           size={1}
-                          inputMode="tel"
-                          autoComplete="tel-national"
-                          placeholder="Phone number"
-                          value={fields.phone}
-                          onChange={(event) => updateField('phone', event.target.value)}
-                          className="min-w-0 flex-1 rounded-r-lg bg-transparent px-2.5 py-1.5 text-xs text-ink placeholder:text-ink/40 focus:outline-none sm:text-[13px]"
+                          autoComplete="name"
+                          placeholder="Your Name"
+                          value={fields.fullName}
+                          onChange={(event) => updateField('fullName', event.target.value)}
+                          className="mt-0.5 w-full bg-transparent text-[13px] font-medium text-ink placeholder:text-ink/40 focus:outline-none sm:text-sm"
                         />
                       </div>
-                      {errors.phone && (
-                        <p className="mt-1 text-[10px] font-medium text-coral">{errors.phone}</p>
+                      {errors.fullName && (
+                        <p className="mt-1 text-[11px] font-medium text-coral">{errors.fullName}</p>
                       )}
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor="modal-timezone"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
-                      >
-                        <Globe2 size={11} className="text-sage" />
-                        Region / Timezone
-                      </label>
-                      <select
-                        id="modal-timezone"
-                        value={fields.timezone}
-                        onChange={(event) => updateField('timezone', event.target.value)}
-                        className={`${COMPACT_FIELD} ${fieldBorder(false)}`}
-                      >
-                        {TIMEZONE_OPTIONS.map((tz) => (
-                          <option key={tz} value={tz}>
-                            {tz}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div>
-                      <label
-                        htmlFor="modal-interest"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
-                      >
-                        <Sparkles size={11} className="text-sage" />
-                        Looking for
-                      </label>
-                      <select
-                        id="modal-interest"
-                        value={fields.interest}
-                        onChange={(event) => updateField('interest', event.target.value)}
-                        className={`${COMPACT_FIELD} ${fieldBorder(false)} truncate`}
-                      >
-                        {INTEREST_OPTIONS.map((item) => (
-                          <option key={item} value={item}>
-                            {item}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="modal-experience"
-                        className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
-                      >
-                        <Activity size={11} className="text-sage" />
-                        Experience
-                      </label>
-                      <select
-                        id="modal-experience"
-                        value={fields.experience}
-                        onChange={(event) => updateField('experience', event.target.value)}
-                        className={`${COMPACT_FIELD} ${fieldBorder(false)} truncate`}
-                      >
-                        {EXPERIENCE_OPTIONS.map((exp) => (
-                          <option key={exp} value={exp}>
-                            {exp}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="mb-1.5 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75">
-                      <Clock3 size={11} className="text-sage" />
-                      Preferred time slot
-                    </span>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {TIME_CHIPS.map((slot) => {
-                        const active = fields.preferredSlot === slot;
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => updateField('preferredSlot', slot)}
-                            aria-pressed={active}
-                            className={`rounded-lg border py-1.5 text-[11px] font-bold transition ${
-                              active
-                                ? 'border-forest bg-forest text-white shadow-2xs'
-                                : 'border-sage/20 bg-cream/65 text-ink/70 hover:border-sage'
-                            }`}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="modal-goal"
-                      className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/75"
+                    <div
+                      className={`relative ${activeDropdown === 'phone' ? 'z-50' : 'z-20'} ${fieldPhoneReveal.className}`}
+                      style={fieldPhoneReveal.style}
                     >
-                      <MessageSquare size={11} className="text-sage" />
-                      Goals or stiffness notes
-                    </label>
-                    <textarea
-                      id="modal-goal"
-                      rows={2}
-                      value={fields.goalNote}
-                      onChange={(event) => updateField('goalNote', event.target.value)}
-                      placeholder="E.g. lower back stiffness, flexibility, or morning energy..."
-                      className={`${COMPACT_FIELD} ${fieldBorder(false)} min-h-[58px] resize-none`}
-                    />
-                  </div>
-                </div>
+                      <div className={fieldBoxClass(Boolean(errors.phone))}>
+                        <label
+                          htmlFor="modal-phone"
+                          className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                        >
+                          Mobile No <span className="text-coral">*</span>
+                        </label>
+                        <div className="mt-0.5">
+                          <DialPhoneInput
+                            id="modal-phone"
+                            value={fields.phone}
+                            dialCountry={dialCountry}
+                            placeholder="Phone number"
+                            hasError={Boolean(errors.phone)}
+                            compact
+                            onPhoneChange={(val) => updateField('phone', val)}
+                            onDialSelect={setDialCountry}
+                            onOpenChange={(isMenuOpen) =>
+                              setActiveDropdown(isMenuOpen ? 'phone' : null)
+                            }
+                          />
+                        </div>
+                      </div>
+                      {errors.phone && (
+                        <p className="mt-1 text-[11px] font-medium text-coral">{errors.phone}</p>
+                      )}
+                    </div>
 
-                <div className="mt-3.5 border-t border-sage/12 pt-3">
-                  <button
-                    type="submit"
-                    disabled={status === 'submitting'}
-                    className="group inline-flex min-h-[42px] w-full items-center justify-center gap-2.5 rounded-lg bg-sage px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-white shadow-[0_10px_22px_rgba(86,118,94,0.26)] transition hover:bg-forest disabled:cursor-wait disabled:opacity-80 sm:min-h-[44px]"
-                  >
-                    <span>
-                      {status === 'submitting' ? 'Confirming request...' : 'Book free session'}
-                    </span>
-                    {status === 'submitting' ? (
-                      <LoaderCircle size={14} className="animate-spin" />
-                    ) : (
-                      <ArrowRight
-                        size={14}
-                        className="transition-transform group-hover:translate-x-0.5"
+                    <div className={fieldEmailReveal.className} style={fieldEmailReveal.style}>
+                      <div className={fieldBoxClass(Boolean(errors.email))}>
+                        <label
+                          htmlFor="modal-email"
+                          className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                        >
+                          Email ID <span className="text-coral">*</span>
+                        </label>
+                        <input
+                          id="modal-email"
+                          type="email"
+                          size={1}
+                          autoComplete="email"
+                          placeholder="Your email address"
+                          value={fields.email}
+                          onChange={(event) => updateField('email', event.target.value)}
+                          className="mt-0.5 w-full bg-transparent text-[13px] font-medium text-ink placeholder:text-ink/40 focus:outline-none sm:text-sm"
+                        />
+                      </div>
+                      {errors.email && (
+                        <p className="mt-1 text-[11px] font-medium text-coral">{errors.email}</p>
+                      )}
+                    </div>
+
+                    <div
+                      className={`grid grid-cols-2 gap-2.5 ${
+                        activeDropdown === 'interest' || activeDropdown === 'location'
+                          ? 'relative z-50'
+                          : 'relative z-10'
+                      } ${fieldProgramReveal.className}`}
+                      style={fieldProgramReveal.style}
+                    >
+                      <div className={fieldBoxClass(false)}>
+                        <label
+                          htmlFor="modal-interest"
+                          className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                        >
+                          Program Interest
+                        </label>
+                        <div className="mt-0.5">
+                          <CustomSelect
+                            id="modal-interest"
+                            ariaLabel="Program Interest"
+                            value={fields.interest}
+                            options={INTEREST_OPTIONS}
+                            compact
+                            onChange={(val) => updateField('interest', val)}
+                            onOpenChange={(isMenuOpen) =>
+                              setActiveDropdown(isMenuOpen ? 'interest' : null)
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className={fieldBoxClass(false)}>
+                        <label
+                          htmlFor="modal-location"
+                          className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                        >
+                          Preferred Location
+                        </label>
+                        <div className="mt-0.5">
+                          <CustomSelect
+                            id="modal-location"
+                            ariaLabel="Preferred Location"
+                            value={fields.location}
+                            options={LOCATION_OPTIONS}
+                            align="right"
+                            compact
+                            onChange={(val) => updateField('location', val)}
+                            onOpenChange={(isMenuOpen) =>
+                              setActiveDropdown(isMenuOpen ? 'location' : null)
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`${fieldBoxClass(false)} ${
+                        activeDropdown === 'dates' ? 'relative z-50' : 'relative z-10'
+                      } ${fieldDatesReveal.className}`}
+                      style={fieldDatesReveal.style}
+                    >
+                      <label
+                        htmlFor="modal-dates"
+                        className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                      >
+                        Preferred Dates &amp; Timing
+                      </label>
+                      <div className="mt-0.5">
+                        <CustomSelect
+                          id="modal-dates"
+                          ariaLabel="Preferred Dates and Timing"
+                          value={fields.preferredDates}
+                          options={DATE_OPTIONS}
+                          placeholder="Choose your timing"
+                          compact
+                          onChange={(val) => updateField('preferredDates', val)}
+                          onOpenChange={(isMenuOpen) =>
+                            setActiveDropdown(isMenuOpen ? 'dates' : null)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      className={`${fieldBoxClass(false)} ${fieldQueryReveal.className}`}
+                      style={fieldQueryReveal.style}
+                    >
+                      <label
+                        htmlFor="modal-goal"
+                        className="block text-[10px] font-semibold tracking-[0.02em] text-ink/60"
+                      >
+                        Your Query
+                      </label>
+                      <textarea
+                        id="modal-goal"
+                        rows={2}
+                        value={fields.goalNote}
+                        onChange={(event) => updateField('goalNote', event.target.value)}
+                        placeholder="Dates, schedule, goals, or anything you'd like to know"
+                        className="mt-0.5 min-h-[48px] w-full resize-none bg-transparent text-[13px] text-ink placeholder:text-ink/40 focus:outline-none sm:min-h-[56px] sm:text-sm"
                       />
-                    )}
-                  </button>
-                  <p className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-ink/50">
-                    <Lock size={10} className="text-sage" />
-                    <span>Zero pressure · Personal match sent within 24 hours</span>
-                  </p>
-                </div>
-              </form>
-            )}
+                    </div>
+
+                    <div className={`space-y-2.5 ${fieldActionReveal.className}`} style={fieldActionReveal.style}>
+                      <label className="flex cursor-pointer items-start gap-2.5 pt-0.5 text-[11px] leading-4 text-ink/55">
+                        <input
+                          type="checkbox"
+                          checked={fields.consent}
+                          onChange={(event) => updateField('consent', event.target.checked)}
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-sage/35 accent-[#233b30]"
+                        />
+                        <span>
+                          By sending this enquiry, you consent to receiving session updates and batch
+                          details via WhatsApp and email.
+                        </span>
+                      </label>
+
+                      <button
+                        type="submit"
+                        disabled={status === 'submitting'}
+                        className="group inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-[#235c3d] px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_28px_rgba(35,92,61,0.28)] transition hover:bg-forest disabled:cursor-wait disabled:opacity-80"
+                      >
+                        <span>{status === 'submitting' ? 'Sending enquiry...' : 'Send Enquiry'}</span>
+                        {status === 'submitting' ? (
+                          <LoaderCircle size={15} className="animate-spin" />
+                        ) : (
+                          <ArrowRight
+                            size={15}
+                            className="transition-transform group-hover:translate-x-0.5"
+                          />
+                        )}
+                      </button>
+
+                      <p className="pt-0.5 text-center text-[11px] text-ink/55">
+                        Prefer a full page?{' '}
+                        <Link
+                          href="/contact"
+                          onClick={closeBooking}
+                          className="font-bold text-[#235c3d] transition hover:text-forest"
+                        >
+                          Open the enquiry page →
+                        </Link>
+                      </p>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
     </BookingModalContext.Provider>
   );
 }
-
