@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { BookingModalProvider } from '../components/booking-modal';
+import { SiteLoader } from '../components/site-loader';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`h-full antialiased ${inter.className} ${inter.variable}`}>
       <body className="min-h-full font-sans antialiased">
+        <SiteLoader />
         <BookingModalProvider>{children}</BookingModalProvider>
       </body>
     </html>

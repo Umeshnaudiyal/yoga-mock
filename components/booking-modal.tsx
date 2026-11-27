@@ -3,6 +3,7 @@
 import {
   CSSProperties,
   FormEvent,
+  PointerEvent as ReactPointerEvent,
   createContext,
   useCallback,
   useContext,
@@ -118,6 +119,8 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isEntered, setIsEntered] = useState(false);
+  const [sheetHeightPx, setSheetHeightPx] = useState<number | null>(null);
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
     'phone' | 'interest' | 'location' | 'dates' | null
   >(null);
@@ -128,6 +131,14 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
 
   const closeTimerRef = useRef<number | null>(null);
   const frameRef = useRef<number | null>(null);
+  const sheetCardRef = useRef<HTMLDivElement>(null);
+  const dragMetaRef = useRef<{
+    pointerId: number;
+    startY: number;
+    startHeight: number;
+    lastHeight: number;
+    moved: boolean;
+  } | null>(null);
 
   const clearScheduledMotion = useCallback(() => {
     if (closeTimerRef.current !== null) {
@@ -213,6 +224,9 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
   const openBooking = useCallback(
     (defaultInterest?: string) => {
       clearScheduledMotion();
+      dragMetaRef.current = null;
+      setIsDraggingSheet(false);
+      setSheetHeightPx(null);
       setStatus('idle');
       setErrors({});
       if (defaultInterest) {
@@ -242,6 +256,8 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
 
   const closeBooking = useCallback(() => {
     clearScheduledMotion();
+    dragMetaRef.current = null;
+    setIsDraggingSheet(false);
     setActiveDropdown(null);
     setIsOpen(false);
     setIsEntered(false);
@@ -252,14 +268,96 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
 
     if (prefersReducedMotion) {
       setIsMounted(false);
+      setSheetHeightPx(null);
       return;
     }
 
     closeTimerRef.current = window.setTimeout(() => {
       setIsMounted(false);
+      setSheetHeightPx(null);
       closeTimerRef.current = null;
     }, EXIT_DURATION_MS);
   }, [clearScheduledMotion]);
+
+  const toggleSheetDetent = useCallback(() => {
+    const vh = window.innerHeight;
+    const currentHeight = sheetCardRef.current?.getBoundingClientRect().height ?? vh * 0.85;
+    const isNearFull = currentHeight >= vh * 0.8;
+    setSheetHeightPx(Math.round(vh * (isNearFull ? 0.56 : 0.94)));
+  }, []);
+
+  const handleSheetPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    const target = event.target as Element | null;
+    if (target?.closest('a, button:not([data-drag-handle])')) return;
+
+    const cardRect = sheetCardRef.current?.getBoundingClientRect();
+    if (!cardRect) return;
+
+    dragMetaRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startHeight: cardRect.height,
+      lastHeight: cardRect.height,
+      moved: false,
+    };
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDraggingSheet(true);
+  }, []);
+
+  const handleSheetPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const meta = dragMetaRef.current;
+    if (!meta || meta.pointerId !== event.pointerId) return;
+
+    const deltaY = meta.startY - event.clientY;
+    if (!meta.moved && Math.abs(deltaY) > 5) {
+      meta.moved = true;
+    }
+
+    const vh = window.innerHeight;
+    const nextHeight = Math.round(Math.min(vh * 0.96, Math.max(190, meta.startHeight + deltaY)));
+    meta.lastHeight = nextHeight;
+    setSheetHeightPx(nextHeight);
+  }, []);
+
+  const handleSheetPointerEnd = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const meta = dragMetaRef.current;
+      if (!meta || meta.pointerId !== event.pointerId) return;
+
+      dragMetaRef.current = null;
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      setIsDraggingSheet(false);
+
+      const vh = window.innerHeight;
+      const target = event.target as Element | null;
+
+      if (!meta.moved) {
+        if (target?.closest('[data-drag-handle]')) {
+          toggleSheetDetent();
+        }
+        return;
+      }
+
+      const finalRatio = meta.lastHeight / vh;
+      if (finalRatio < 0.3) {
+        closeBooking();
+        return;
+      }
+
+      if (finalRatio >= 0.87) {
+        setSheetHeightPx(Math.round(vh * 0.94));
+      } else if (finalRatio <= 0.44) {
+        setSheetHeightPx(Math.round(vh * 0.52));
+      } else {
+        setSheetHeightPx(meta.lastHeight);
+      }
+    },
+    [closeBooking, toggleSheetDetent]
+  );
 
   useEffect(() => {
     if (!isMounted) return;
@@ -350,8 +448,18 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
           }`}
         >
           <div
+            ref={sheetCardRef}
             onClick={(event) => event.stopPropagation()}
-            className={`grid max-h-[94dvh] w-full max-w-[850px] overflow-hidden rounded-t-2xl border border-b-0 border-sage/20 bg-white shadow-[0_32px_85px_rgba(14,28,20,0.36)] transition-[opacity,transform] duration-[780ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[transform,opacity] md:grid-cols-[0.86fr_1.14fr] md:rounded-2xl md:border-b ${
+            style={
+              sheetHeightPx !== null
+                ? ({ ['--sheet-h' as string]: `${sheetHeightPx}px` } as CSSProperties)
+                : undefined
+            }
+            className={`grid w-full max-w-[850px] overflow-hidden rounded-t-2xl border border-b-0 border-sage/20 bg-white shadow-[0_32px_85px_rgba(14,28,20,0.36)] will-change-[transform,opacity,height] max-md:h-[var(--sheet-h,auto)] max-md:max-h-[96dvh] max-md:grid-rows-[minmax(0,1fr)] md:max-h-[93dvh] md:grid-cols-[0.86fr_1.14fr] md:rounded-2xl md:border-b ${
+              isDraggingSheet
+                ? 'transition-none'
+                : 'transition-[height,opacity,transform] duration-[780ms] ease-[cubic-bezier(0.16,1,0.3,1)]'
+            } ${
               isEntered
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-full opacity-0 md:translate-y-9 md:scale-[0.96]'
@@ -450,18 +558,35 @@ export function BookingModalProvider({ children }: { children: React.ReactNode }
               </div>
             </aside>
 
-            <div className="flex max-h-[94dvh] flex-col overflow-hidden bg-white md:max-h-[93dvh]">
-              <div className="relative shrink-0 overflow-hidden bg-[linear-gradient(150deg,#183629_0%,#214c38_58%,#152f22_100%)] px-4 pb-4 pt-2.5 text-white md:hidden">
+            <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white md:max-h-[93dvh]">
+              <div
+                onPointerDown={handleSheetPointerDown}
+                onPointerMove={handleSheetPointerMove}
+                onPointerUp={handleSheetPointerEnd}
+                onPointerCancel={handleSheetPointerEnd}
+                className="relative shrink-0 touch-none select-none overflow-hidden bg-[linear-gradient(150deg,#183629_0%,#214c38_58%,#152f22_100%)] px-4 pb-4 pt-1 text-white md:hidden cursor-grab active:cursor-grabbing"
+              >
                 <Flower2
                   size={136}
                   strokeWidth={0.75}
                   aria-hidden="true"
                   className="pointer-events-none absolute -bottom-7 right-6 text-white/[0.08]"
                 />
-                <div
-                  aria-hidden="true"
-                  className="mx-auto mb-3 h-1 w-9 rounded-full bg-white/35"
-                />
+                <button
+                  type="button"
+                  data-drag-handle="true"
+                  onClick={(event) => {
+                    if (event.detail === 0) toggleSheetDetent();
+                  }}
+                  aria-label="Drag up or down to resize, or activate to toggle enquiry sheet height"
+                  className="relative z-10 mx-auto flex w-full cursor-grab items-center justify-center pb-2.5 pt-2 touch-none focus:outline-none active:cursor-grabbing"
+                >
+                  <span
+                    className={`block h-1.5 rounded-full transition-all duration-200 ${
+                      isDraggingSheet ? 'w-12 bg-white/80' : 'w-10 bg-white/40 hover:bg-white/65'
+                    }`}
+                  />
+                </button>
                 <div className="relative z-10 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-display text-[19px] font-extrabold leading-[1.12] tracking-[-0.03em] text-white">

@@ -185,6 +185,27 @@
   50% { transform: scaleY(0.32); }
 }
 
+@keyframes orbit-ccw {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes dot-wave {
+  0%, 65%, 100% {
+    opacity: 0.3;
+    transform: translateY(0px) scale(0.85);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2.5px) scale(1.1);
+  }
+}
+
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
+}
+
 @layer utilities {
   .text-sage { color: #6e8d75; }
   .font-display { font-family: var(--font-display); }
@@ -200,6 +221,8 @@
   .animate-river-drift-reverse { animation: river-drift-reverse 11s ease-in-out infinite; }
   .animate-sun-breathe { animation: sun-breathe 6s ease-in-out infinite; }
   .animate-wing-flap { animation: wing-flap 1.4s ease-in-out infinite; }
+  .animate-dot-wave { animation: dot-wave 1.25s ease-in-out infinite; }
+  .animate-shimmer-slide { animation: shimmer-slide 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
   .animate-stagger > * { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .animate-stagger > *:nth-child(2) { animation-delay: 120ms; }
   .animate-stagger > *:nth-child(3) { animation-delay: 240ms; }
