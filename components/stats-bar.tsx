@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { Globe2, HeartHandshake, Sparkles, Users } from 'lucide-react';
 import { Reveal } from './reveal';
+import { isSiteLoading, SITE_LOADER_REVEAL_EVENT } from './site-loader';
 
 const stats = [
   { icon: Users, target: 10000, suffix: '+', label: 'Happy Students' },
@@ -53,7 +54,7 @@ function CountUpValue({
   );
 }
 
-/** Animated metrics bar with bold display numerals triggered once on viewport entry. */
+/** Animated metrics bar synced with loader reveal and triggered once on viewport entry. */
 export function StatsBar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
@@ -62,18 +63,32 @@ export function StatsBar() {
     const element = containerRef.current;
     if (!element) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setActive(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
+    let observer: IntersectionObserver | null = null;
 
-    observer.observe(element);
-    return () => observer.disconnect();
+    const armObserver = () => {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setActive(true);
+            observer?.disconnect();
+          }
+        },
+        { threshold: 0.22, rootMargin: '0px 0px -28px 0px' }
+      );
+
+      observer.observe(element);
+    };
+
+    if (!isSiteLoading()) {
+      armObserver();
+    } else {
+      window.addEventListener(SITE_LOADER_REVEAL_EVENT, armObserver, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener(SITE_LOADER_REVEAL_EVENT, armObserver);
+      observer?.disconnect();
+    };
   }, []);
 
   return (
@@ -83,10 +98,13 @@ export function StatsBar() {
           ref={containerRef}
           className="mx-auto grid w-full max-w-[1920px] grid-cols-2 gap-y-5 rounded-xl border border-sage/15 bg-white/90 px-3 py-5 shadow-[0_18px_50px_rgba(80,98,83,0.08)] backdrop-blur-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-sage/20 sm:rounded-2xl sm:px-6 sm:py-7 lg:w-[92%] lg:py-8 2xl:w-[88%]"
         >
-          {stats.map(({ icon: Icon, target, suffix, label }) => (
+          {stats.map(({ icon: Icon, target, suffix, label }, index) => (
             <div
               key={label}
-              className="group flex flex-col items-center gap-3 px-3 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left"
+              style={{ transitionDelay: active ? `${index * 80}ms` : '0ms' } as CSSProperties}
+              className={`group flex flex-col items-center gap-3 px-3 text-center transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] sm:flex-row sm:justify-center sm:gap-4 sm:text-left ${
+                active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+              }`}
             >
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-all duration-300 group-hover:scale-105 group-hover:bg-forest group-hover:text-sand sm:h-14 sm:w-14">
                 <Icon size={22} strokeWidth={1.85} />

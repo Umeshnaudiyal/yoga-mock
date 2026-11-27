@@ -103,18 +103,18 @@ export default function Home() {
   return (
     <main className="overflow-hidden bg-cream text-ink">
       <SiteHeader />
-      <section className="relative min-h-[700px] bg-forest text-white lg:min-h-[820px]">
-        <img src={`${asset}/marketing/hero.webp`} alt="Yoga instructor practicing beside the sea" className="animate-slow-zoom absolute inset-0 h-full w-full object-cover object-center opacity-80" />
+      <section className="relative min-h-[700px] overflow-hidden bg-forest text-white lg:min-h-[820px]">
+        <img src={`${asset}/marketing/hero.webp`} alt="Yoga instructor practicing beside the sea" className="hero-bg-zoom absolute inset-0 h-full w-full object-cover object-center opacity-80" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(25,43,35,0.78),rgba(25,43,35,0.38)_55%,rgba(25,43,35,0.32))]" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(25,43,35,0.74),transparent_40%)]" />
 
         <div id="top" className="relative z-10 mx-auto flex w-full max-w-[1920px] px-3.5 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-40 lg:w-[92%] lg:px-0 lg:pb-36 lg:pt-44 2xl:w-[88%]">
           <div className="max-w-2xl">
-            <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-sand backdrop-blur-sm"><span className="h-1.5 w-1.5 rounded-full bg-sand" /> Live online yoga for real life</div>
-            <h1 className="animate-fade-up [animation-delay:120ms] font-display text-5xl font-semibold leading-[1.04] tracking-[-0.055em] sm:text-6xl lg:text-[78px]">Come home to <span className="text-sand">yourself.</span></h1>
-            <p className="animate-fade-up [animation-delay:220ms] mt-6 max-w-lg text-[16px] leading-7 text-white/78 sm:text-lg">Live yoga sessions with expert guidance, real-time support, and a practice that meets you exactly where you are.</p>
-            <div className="animate-fade-up [animation-delay:320ms] mt-8 flex flex-col gap-3 sm:flex-row"><ActionLink modal light>Book your free session</ActionLink><a href="#experience" className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-6 py-3 text-[13px] font-bold uppercase tracking-[0.06em] text-white transition hover:border-white/60 hover:bg-white/10"><Play size={13} fill="currentColor" /> See how it works</a></div>
-            <div className="animate-fade-up [animation-delay:420ms] mt-10 flex flex-wrap items-center gap-3 text-xs text-white/70"><span className="flex -space-x-2">{['dev.webp', 'anjali.webp', '1.webp', '2.webp'].map((image) => <img key={image} src={`${cdn}/testimonials/${image}`} alt="Student" className="h-8 w-8 rounded-full border-2 border-forest object-cover" />)}</span><span><span className="font-bold text-white">1,000+ students</span> have found their flow</span><span className="text-sand">★★★★★</span></div>
+            <div className="hero-enter mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-sand backdrop-blur-sm"><span className="h-1.5 w-1.5 rounded-full bg-sand" /> Live online yoga for real life</div>
+            <h1 style={{ '--hero-delay': '110ms' } as React.CSSProperties} className="hero-enter font-display text-5xl font-semibold leading-[1.04] tracking-[-0.055em] sm:text-6xl lg:text-[78px]">Come home to <span className="text-sand">yourself.</span></h1>
+            <p style={{ '--hero-delay': '210ms' } as React.CSSProperties} className="hero-enter mt-6 max-w-lg text-[16px] leading-7 text-white/78 sm:text-lg">Live yoga sessions with expert guidance, real-time support, and a practice that meets you exactly where you are.</p>
+            <div style={{ '--hero-delay': '310ms' } as React.CSSProperties} className="hero-enter mt-8 flex flex-col gap-3 sm:flex-row"><ActionLink modal light>Book your free session</ActionLink><a href="#experience" className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-6 py-3 text-[13px] font-bold uppercase tracking-[0.06em] text-white transition hover:border-white/60 hover:bg-white/10"><Play size={13} fill="currentColor" /> See how it works</a></div>
+            <div style={{ '--hero-delay': '400ms' } as React.CSSProperties} className="hero-enter mt-10 flex flex-wrap items-center gap-3 text-xs text-white/70"><span className="flex -space-x-2">{['dev.webp', 'anjali.webp', '1.webp', '2.webp'].map((image) => <img key={image} src={`${cdn}/testimonials/${image}`} alt="Student" className="h-8 w-8 rounded-full border-2 border-forest object-cover" />)}</span><span><span className="font-bold text-white">1,000+ students</span> have found their flow</span><span className="text-sand">★★★★★</span></div>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 z-10 h-16 rounded-t-[50%] bg-cream" />

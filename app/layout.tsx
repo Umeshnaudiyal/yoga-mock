@@ -30,8 +30,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.className} ${inter.variable}`}>
+    <html
+      lang="en"
+      data-site-loading="true"
+      suppressHydrationWarning
+      className={`h-full antialiased ${inter.className} ${inter.variable}`}
+    >
       <body className="min-h-full font-sans antialiased">
+        <noscript>
+          <style>
+            {'html[data-site-loading="true"] .hero-enter{opacity:1!important;transform:none!important;}'}
+          </style>
+        </noscript>
         <SiteLoader />
         <BookingModalProvider>{children}</BookingModalProvider>
       </body>

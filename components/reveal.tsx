@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { isSiteLoading, SITE_LOADER_REVEAL_EVENT } from './site-loader';
 
 type RevealHandler = (element: HTMLElement) => void;
 
@@ -13,8 +14,10 @@ function getSharedObserver(): IntersectionObserver | null {
 
   sharedObserver = new IntersectionObserver(
     (entries) => {
+      if (isSiteLoading()) return;
+
       for (const entry of entries) {
-        if (!entry.isIntersecting && entry.boundingClientRect.top > window.innerHeight) continue;
+        if (!entry.isIntersecting && entry.boundingClientRect.top > window.innerHeight * 0.96) continue;
         const handler = elementHandlers.get(entry.target);
         if (handler) {
           handler(entry.target as HTMLElement);
@@ -23,13 +26,13 @@ function getSharedObserver(): IntersectionObserver | null {
         sharedObserver?.unobserve(entry.target);
       }
     },
-    { threshold: 0.01, rootMargin: '0px 0px -24px 0px' }
+    { threshold: 0.06, rootMargin: '0px 0px -36px 0px' }
   );
 
   return sharedObserver;
 }
 
-/** Lightweight GPU-composited bottom-up scroll reveal sharing a single viewport observer. */
+/** Lightweight GPU-composited bottom-up scroll reveal synced with site loader readiness. */
 export function Reveal({
   children,
   delay = 0,
@@ -52,24 +55,37 @@ export function Reveal({
       return;
     }
 
-    const rect = element.getBoundingClientRect();
-    if (rect.top <= window.innerHeight * 0.98) {
-      const frame = window.requestAnimationFrame(show);
-      return () => window.cancelAnimationFrame(frame);
-    }
+    let frameId = 0;
+    let observer: IntersectionObserver | null = null;
 
-    const observer = getSharedObserver();
-    if (!observer) {
-      show();
-      return;
-    }
+    const armReveal = () => {
+      const rect = element.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.94 && rect.bottom >= 0) {
+        frameId = window.requestAnimationFrame(show);
+        return;
+      }
 
-    elementHandlers.set(element, show);
-    observer.observe(element);
+      observer = getSharedObserver();
+      if (!observer) {
+        show();
+        return;
+      }
+
+      elementHandlers.set(element, show);
+      observer.observe(element);
+    };
+
+    if (!isSiteLoading()) {
+      armReveal();
+    } else {
+      window.addEventListener(SITE_LOADER_REVEAL_EVENT, armReveal, { once: true });
+    }
 
     return () => {
+      window.removeEventListener(SITE_LOADER_REVEAL_EVENT, armReveal);
+      if (frameId) window.cancelAnimationFrame(frameId);
       elementHandlers.delete(element);
-      observer.unobserve(element);
+      observer?.unobserve(element);
     };
   }, []);
 

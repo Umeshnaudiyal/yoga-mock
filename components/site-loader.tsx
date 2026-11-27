@@ -4,6 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { FooterMandala } from './footer-enquiry-banner';
 
+export const SITE_LOADER_REVEAL_EVENT = 'site-loader:reveal';
+
+export function isSiteLoading(): boolean {
+  return (
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.siteLoading === 'true'
+  );
+}
+
 /** Soft pastel light-green sanctuary loading overlay visual shared by SiteLoader and app/loading. */
 export function LoaderCanvas({ fading = false }: { fading?: boolean }) {
   return (
@@ -155,6 +164,7 @@ export function SiteLoader() {
   const isTransitioningRef = useRef(true);
   const fadeTimerRef = useRef<number | null>(null);
   const fadeFrameRef = useRef<number | null>(null);
+  const revealTimerRef = useRef<number | null>(null);
   const unmountTimerRef = useRef<number | null>(null);
   const failsafeTimerRef = useRef<number | null>(null);
 
@@ -166,6 +176,10 @@ export function SiteLoader() {
     if (fadeFrameRef.current !== null) {
       window.cancelAnimationFrame(fadeFrameRef.current);
       fadeFrameRef.current = null;
+    }
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
     }
     if (unmountTimerRef.current !== null) {
       window.clearTimeout(unmountTimerRef.current);
@@ -190,6 +204,7 @@ export function SiteLoader() {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const effectiveDwell = prefersReducedMotion ? 80 : minDwellMs;
       const fadeDurationMs = prefersReducedMotion ? 100 : 420;
+      const revealOffsetMs = prefersReducedMotion ? 20 : 120;
       const elapsed = performance.now() - startedAtRef.current;
       const delayBeforeFade = Math.max(0, effectiveDwell - elapsed);
 
@@ -198,8 +213,14 @@ export function SiteLoader() {
         fadeFrameRef.current = window.requestAnimationFrame(() => {
           fadeFrameRef.current = null;
           setIsFading(true);
+          revealTimerRef.current = window.setTimeout(() => {
+            revealTimerRef.current = null;
+            document.documentElement.dataset.siteLoading = 'false';
+            window.dispatchEvent(new Event(SITE_LOADER_REVEAL_EVENT));
+          }, revealOffsetMs);
           unmountTimerRef.current = window.setTimeout(() => {
             setIsMounted(false);
+            document.documentElement.dataset.siteLoading = 'false';
             unmountTimerRef.current = null;
           }, fadeDurationMs);
         });
@@ -212,6 +233,7 @@ export function SiteLoader() {
     clearAllTimers();
     isTransitioningRef.current = true;
     startedAtRef.current = performance.now();
+    document.documentElement.dataset.siteLoading = 'true';
     setIsMounted(true);
     setIsFading(false);
 
@@ -221,6 +243,7 @@ export function SiteLoader() {
   }, [clearAllTimers, scheduleDismiss]);
 
   useEffect(() => {
+    document.documentElement.dataset.siteLoading = 'true';
     startedAtRef.current = performance.now();
 
     const handleInitialLoad = () => scheduleDismiss(700);
@@ -293,6 +316,7 @@ export function SiteLoader() {
       document.removeEventListener('click', handleDocumentClick, true);
       window.removeEventListener('popstate', handlePopState);
       clearAllTimers();
+      document.documentElement.dataset.siteLoading = 'false';
     };
   }, [beginRouteLoader, clearAllTimers, scheduleDismiss]);
 
@@ -303,6 +327,7 @@ export function SiteLoader() {
     if (!isTransitioningRef.current) {
       isTransitioningRef.current = true;
       startedAtRef.current = performance.now();
+      document.documentElement.dataset.siteLoading = 'true';
     }
 
     const routeTimer = window.setTimeout(() => {
